@@ -23,7 +23,7 @@ import ModalPhotos from "./ModalPhotos";
 import BackgroundSection from "components/BackgroundSection/BackgroundSection";
 import SectionSliderNewCategories from "components/SectionSliderNewCategories/SectionSliderNewCategories";
 import SectionSubscribe2 from "components/SectionSubscribe2/SectionSubscribe2";
-import ExperiencesDateSingleInput from "components/HeroSearchForm/ExperiencesDateSingleInput";
+import ExperiencesDateSingleInput from "components/HeroSearchForm/RentalsDateSingleInput";
 import MobileFooterSticky from "./MobileFooterSticky";
 
 export interface ListingExperiencesDetailPageProps {

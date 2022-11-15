@@ -1,5 +1,5 @@
 import React, { FC, useState } from "react";
-import ExperiencesSearchForm from "./ExperiencesSearchForm";
+import RentalSearchForm from "./RentalSearchForm";
 import AdventureSearchForm from "./AdventureSearchForm";
 
 export type SearchTab = "Adventure" | "Rental";
@@ -50,7 +50,7 @@ const HeroSearchForm: FC<HeroSearchFormProps> = ({
       case "Adventure":
         return <AdventureSearchForm haveDefaultValue={isArchivePage} />;
       case "Rental":
-        return <ExperiencesSearchForm haveDefaultValue={isArchivePage} />;
+        return <RentalSearchForm haveDefaultValue={isArchivePage} />;
       default:
         return null;
     }

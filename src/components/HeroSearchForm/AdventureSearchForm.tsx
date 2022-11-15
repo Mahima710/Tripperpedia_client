@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import LocationInput from "./LocationInput";
 import ActivityInput from "./ActivityInput";
 import { FocusedInputShape } from "react-dates";
-import StayDatesRangeInput from "./StayDatesRangeInput";
 import moment from "moment";
 import { FC } from "react";
 
@@ -22,13 +21,8 @@ const defaultActivityValue = "Skiing";
 const AdventureSearchForm: FC<AdventureSearchFormProps> = ({
   haveDefaultValue = false,
 }) => {
-  // const [dateRangeValue, setDateRangeValue] = useState<DateRage>({
-  //   startDate: null,
-  //   endDate: null,
-  // });
   const [locationInputValue, setLocationInputValue] = useState("");
   const [ActivityInputValue, setActivityInputValue] = useState("");
-  //const [guestValue, setGuestValue] = useState({});
 
   const [dateFocused, setDateFocused] = useState<FocusedInputShape | null>(
     null
