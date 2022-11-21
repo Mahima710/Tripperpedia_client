@@ -7,6 +7,8 @@ import SectionSliderNewCategories from "components/SectionSliderNewCategories/Se
 import SectionSubscribe2 from "components/SectionSubscribe2/SectionSubscribe2";
 import SectionGridHasMap from "./SectionGridHasMap";
 import { Helmet } from "react-helmet";
+import { useParams } from "react-router-dom";
+import { useGetAllActivitiesPlaces, useGetAllActivitiesStates } from "api/hooks";
 
 export interface ListingStayMapPageProps {
   className?: string;
@@ -15,19 +17,18 @@ export interface ListingStayMapPageProps {
 const ListingStayMapPage: FC<ListingStayMapPageProps> = ({
   className = "",
 }) => {
+  let {state} = useParams()
+  const {data: activityPlacesData, status: activityPlacesStatus, error: activityPlacesError} = useGetAllActivitiesStates(state);
   return (
     <div
       className={`nc-ListingStayMapPage relative ${className}`}
       data-nc-id="ListingStayMapPage"
     >
-      <Helmet>
-        <title>Chisfis || Booking React Template</title>
-      </Helmet>
       <BgGlassmorphism />
 
       {/* SECTION HERO */}
       <div className="container pt-10 pb-24 lg:pt-16 lg:pb-28">
-        <SectionHeroArchivePage currentPage="Adventure" currentTab="Adventure" />
+        <SectionHeroArchivePage currentPage="Adventure" currentTab="Adventure" state={state} />
       </div>
 
       {/* SECTION */}

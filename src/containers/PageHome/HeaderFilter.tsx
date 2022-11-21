@@ -7,6 +7,7 @@ import { ReactNode } from "react";
 
 export interface HeaderFilterProps {
   tabActive: string;
+  setTabActive : (item : string) => void
   tabs: string[];
   heading: ReactNode;
   subHeading?: ReactNode;
@@ -15,20 +16,20 @@ export interface HeaderFilterProps {
 
 const HeaderFilter: FC<HeaderFilterProps> = ({
   tabActive,
+  setTabActive,
   tabs,
   subHeading = "",
   heading = "🎈 Latest Articles",
   onClickTab,
 }) => {
-  const [tabActiveState, setTabActiveState] = useState(tabActive);
 
   useEffect(() => {
-    setTabActiveState(tabActive);
+    setTabActive(tabActive)
   }, [tabActive]);
 
   const handleClickTab = (item: string) => {
     onClickTab && onClickTab(item);
-    setTabActiveState(item);
+    setTabActive(item)
   };
 
   return (
@@ -42,7 +43,7 @@ const HeaderFilter: FC<HeaderFilterProps> = ({
           {tabs.map((item, index) => (
             <NavItem
               key={index}
-              isActive={tabActiveState === item}
+              isActive={tabActive === item}
               onClick={() => handleClickTab(item)}
             >
               {item}

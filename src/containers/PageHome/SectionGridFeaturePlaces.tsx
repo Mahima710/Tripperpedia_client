@@ -1,16 +1,20 @@
-import React, { FC, ReactNode } from "react";
-import { DEMO_STAY_LISTINGS } from "data/listings";
-import { StayDataType } from "data/types";
-import ButtonPrimary from "shared/Button/ButtonPrimary";
+import React, { FC, ReactNode, useState } from "react";
+import { IAdventureActivities, IRentalActivities } from "data/types";
 import HeaderFilter from "./HeaderFilter";
-import StayCard from "components/StayCard/StayCard";
+import {
+  useGetAllAdventureActivities,
+  useGetAllRentalActivities,
+} from "api/hooks";
+import ActivitiesCard from "components/ActivitiesCard/ActivitiesCard";
+import BookARide from "components/BookaRide/BookARide";
 
-// OTHER DEMO WILL PASS PROPS
-const DEMO_DATA: StayDataType[] = DEMO_STAY_LISTINGS.filter((_, i) => i < 8);
 
-//
+export interface IrenderTabs {
+  tabActive: string;
+  AdventureActivityData: IAdventureActivities[];
+}
+
 export interface SectionGridFeaturePlacesProps {
-  stayListings?: StayDataType[];
   gridClass?: string;
   heading?: ReactNode;
   subHeading?: ReactNode;
@@ -18,34 +22,78 @@ export interface SectionGridFeaturePlacesProps {
   tabs?: string[];
 }
 
-const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
-  stayListings = DEMO_DATA,
-  gridClass = "",
-  heading = "Featured places to stay",
-  subHeading = "Popular places to stay that Chisfis recommends for you",
-  headingIsCenter,
-  tabs = ["New York", "Tokyo", "Paris", "London"],
-}) => {
-  const renderCard = (stay: StayDataType) => {
-    return <StayCard key={stay.id} data={stay} />;
-  };
+export type Itabs =
+  | "Adventure Activities"
+  | "Rental Activities"
+  | "Taxi Services";
 
+const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
+  gridClass = "",
+  heading = "Explore our Services",
+  subHeading = "Popular activities and services that we present for you",
+  headingIsCenter,
+  tabs = ["Adventure Activities", "Rental Activities", "Taxi Services"],
+}) => {
+  const [tabActive, setTabActive] = useState("Adventure Activities");
+  const {
+    data: AdventureActivityData,
+    status: AdventureActivityStatus,
+    error: AdventureActivityError,
+  } = useGetAllAdventureActivities({enabled:tabActive==="Adventure Activities"});
+  const {
+    data: RentalActivityData,
+    status: RentalActivityStatus,
+    error: RentalActivityError,
+  } = useGetAllRentalActivities({enabled:tabActive==="Rental Activities"});
+  const renderCard = (
+    AdventureActivities: IAdventureActivities | IRentalActivities,
+    activeTab: Itabs
+  ) => {
+    if (activeTab === "Adventure Activities")
+      return (
+        <ActivitiesCard
+          key={AdventureActivities.id}
+          data={AdventureActivities as IAdventureActivities}
+        />
+      );
+    else if (activeTab === "Rental Activities")
+      return (
+        <ActivitiesCard
+          key={AdventureActivities.id}
+          data={AdventureActivities as IRentalActivities}
+        />
+      );
+  };
+ let classgrid = tabActive === "Taxi Services"? "w-50 my-20 mx-auto": `grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`;
+  const renderTabs = () => {
+    switch (tabActive) {
+      case "Adventure Activities":
+      default:
+        return AdventureActivityData?.map((stay) =>
+          renderCard(stay, "Adventure Activities")
+        );
+      case "Rental Activities":
+        return RentalActivityData?.map((stay) =>
+          renderCard(stay, "Rental Activities")
+        );
+      case "Taxi Services":
+        return <BookARide />;
+    }
+  };
   return (
     <div className="nc-SectionGridFeaturePlaces relative">
       <HeaderFilter
-        tabActive={"New York"}
+        tabActive={tabActive}
+        setTabActive={setTabActive}
         subHeading={subHeading}
         tabs={tabs}
         heading={heading}
         onClickTab={() => {}}
       />
       <div
-        className={`grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`}
+        className={classgrid}
       >
-        {DEMO_DATA.map((stay) => renderCard(stay))}
-      </div>
-      <div className="flex mt-16 justify-center items-center">
-        <ButtonPrimary loading>Show me more</ButtonPrimary>
+        {renderTabs()}
       </div>
     </div>
   );

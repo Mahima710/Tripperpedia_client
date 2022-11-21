@@ -17,7 +17,7 @@ const GallerySlider: FC<GallerySliderProps> = ({
   className = "",
   galleryImgs,
   ratioClass = "aspect-w-4 aspect-h-3",
-  uniqueID = "uniqueID",
+  uniqueID,
   href = "/listing-stay-detail",
 }) => {
   const UNIQUE_CLASS = `gallerySlider__${uniqueID}` + useNcId();
@@ -28,14 +28,14 @@ const GallerySlider: FC<GallerySliderProps> = ({
       gap: 0,
       keyboard: false,
     });
-  }, [UNIQUE_CLASS]);
+  }, [UNIQUE_CLASS, galleryImgs]);
 
   useEffect(() => {
     setTimeout(() => {
       MY_GLIDEJS.mount();
     }, 10);
-  }, [MY_GLIDEJS, UNIQUE_CLASS, galleryImgs]);
-
+  }, [MY_GLIDEJS, UNIQUE_CLASS]);
+  console.log(galleryImgs)
   const renderDots = () => {
     return (
       <div
@@ -60,9 +60,12 @@ const GallerySlider: FC<GallerySliderProps> = ({
           <ul className="glide__slides">
             {galleryImgs.map((item, index) => (
               <li key={index} className="glide__slide">
+                <>
+                {console.log(item," item")}
                 <Link to={href} className={`block ${ratioClass}`}>
                   <NcImage src={item} />
                 </Link>
+                </>
               </li>
             ))}
           </ul>

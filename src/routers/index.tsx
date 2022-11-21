@@ -37,23 +37,19 @@ import PageAddListing7 from "containers/PageAddListing1/PageAddListing7";
 import PageAddListing8 from "containers/PageAddListing1/PageAddListing8";
 import PageAddListing9 from "containers/PageAddListing1/PageAddListing9";
 import PageAddListing10 from "containers/PageAddListing1/PageAddListing10";
-import PageHome2 from "containers/PageHome/PageHome2";
 import ListingRealEstateMapPage from "containers/ListingRealEstatePage/ListingRealEstateMapPage";
 import ListingRealEstatePage from "containers/ListingRealEstatePage/ListingRealEstatePage";
 import SiteHeader from "containers/SiteHeader";
 import ListingFlightsPage from "containers/ListingFlightsPage/ListingFlightsPage";
 import FooterNav from "components/FooterNav";
 import useWindowSize from "hooks/useWindowResize";
-import PageHome3 from "containers/PageHome/PageHome3";
 
 export const pages: Page[] = [
   { path: "/", exact: true, component: PageHome },
   { path: "/#", exact: true, component: PageHome },
   { path: "/home-1-header-2", exact: true, component: PageHome },
-  { path: "/home-2", component: PageHome2 },
-  { path: "/home-3", component: PageHome3 },
   //
-  { path: "/listing-stay", component: ListingStayPage },
+  { path: "/activities_places/:state", component: ListingStayPage },
   { path: "/listing-stay-map", component: ListingStayMapPage },
   { path: "/listing-stay-detail", component: ListingStayDetailPage },
   //

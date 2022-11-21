@@ -7,25 +7,25 @@ import SectionSubscribe2 from "components/SectionSubscribe2/SectionSubscribe2";
 import React, { FC } from "react";
 import SectionGridFilterCard from "./SectionGridFilterCard";
 import { Helmet } from "react-helmet";
+import { useParams } from "react-router-dom";
 
 export interface ListingStayPageProps {
   className?: string;
 }
 
 const ListingStayPage: FC<ListingStayPageProps> = ({ className = "" }) => {
+  const {state} = useParams()
   return (
     <div
       className={`nc-ListingStayPage relative overflow-hidden ${className}`}
       data-nc-id="ListingStayPage"
     >
-      <Helmet>
-        <title>Tripperpedia</title>
-      </Helmet>
       <BgGlassmorphism />
 
       <div className="container relative overflow-hidden">
         {/* SECTION HERO */}
         <SectionHeroArchivePage
+          state={state}
           currentPage="Adventure"
           currentTab="Adventure"
           className="pt-10 pb-24 lg:pb-28 lg:pt-16 "

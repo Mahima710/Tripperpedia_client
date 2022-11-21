@@ -1,3 +1,5 @@
+import { Interface } from "readline";
+
 //  ######  CustomLink  ######## //
 export interface CustomLink {
   label: string;
@@ -137,4 +139,99 @@ export interface CarDataType {
     lat: number;
     lng: number;
   };
+}
+
+export interface IActivityPlaces {
+  state: string;
+  image: string;
+}
+
+export interface Price {
+  id: number;
+  no_of_person: number;
+  admin_amount: string;
+  amount: string;
+  status: string;
+}
+
+export interface Image {
+  id: number;
+  media_path: string;
+  status: string;
+}
+
+export interface IAdventureActivities {
+  id: number;
+  activity_category: string;
+  activity_adventure_type: string;
+  title: string;
+  status: string;
+  state: string;
+  city: string;
+  country: string;
+  location: string;
+  latitude: string;
+  longitude: string;
+  discount: string;
+  wishlist: boolean;
+  price: Price[];
+  video: string;
+  images: Image[];
+  rating?: any;
+  reviews: number;
+}
+
+export interface PerHour {
+  id: number;
+  amount: string;
+  admin_amount: string;
+  status: string;
+}
+
+export interface PerDay {
+  id: number;
+  amount: string;
+  admin_amount: string;
+  status: string;
+}
+
+export interface Price {
+  per_hour: PerHour;
+  per_day: PerDay;
+}
+
+export interface Image {
+  id: number;
+  media_path: string;
+  status: string;
+}
+
+export interface IRentalActivities {
+  id: number;
+  activity_category: string;
+  brand: string;
+  model: string;
+  title: string;
+  status: string;
+  state: string;
+  city: string;
+  country: string;
+  location: string;
+  latitude: string;
+  longitude: string;
+  discount: string;
+  wishlist: boolean;
+  price: Price;
+  video: string;
+  images: Image[];
+  rating?: any;
+  reviews: number;
+}
+
+export interface IGetAllActivitiesStates {
+  id: number;
+  activity_category: string;
+  title: string;
+  image: string;
+  status: string;
 }

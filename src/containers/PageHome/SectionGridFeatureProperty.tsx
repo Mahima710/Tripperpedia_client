@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useState } from "react";
 import { DEMO_STAY_LISTINGS } from "data/listings";
 import { StayDataType } from "data/types";
 import ButtonPrimary from "shared/Button/ButtonPrimary";
@@ -28,11 +28,12 @@ const SectionGridFeatureProperty: FC<SectionGridFeaturePropertyProps> = ({
   const renderCard = (stay: StayDataType, index: number) => {
     return <PropertyCardH key={index} className="h-full" data={stay} />;
   };
-
+  const [tabActive, setTabActive] = useState("New York")
   return (
     <div className="nc-SectionGridFeatureProperty relative">
       <HeaderFilter
-        tabActive={"New York"}
+        tabActive= {tabActive}
+        setTabActive = {setTabActive}
         subHeading={subHeading}
         tabs={tabs}
         heading={heading}
