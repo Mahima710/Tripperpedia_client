@@ -1,11 +1,13 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import facebookSvg from "images/Facebook.svg";
 import twitterSvg from "images/Twitter.svg";
 import googleSvg from "images/Google.svg";
 import { Helmet } from "react-helmet";
 import Input from "shared/Input/Input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ButtonPrimary from "shared/Button/ButtonPrimary";
+import { ILoginFormData } from "data/types";
+import { useLoginUser } from "api/hooks";
 
 export interface PageLoginProps {
   className?: string;
@@ -30,6 +32,36 @@ const loginSocials = [
 ];
 
 const PageLogin: FC<PageLoginProps> = ({ className = "" }) => {
+  const [formData, setFormData] = useState<ILoginFormData>({
+    email: "",
+    password: "",
+  });
+  const [hasClickedSubmit, setHasClickedSubmit] = useState<boolean>(false);
+  const navigate = useNavigate();
+
+  const { mutate: loginUser, status: loginUserStatus } = useLoginUser({
+    onSuccess: (data) => {
+      console.log(data, "data");
+      // TODO: Set token in localstorage
+      navigate("/");
+    },
+  });
+
+  const { email, password } = formData;
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    setHasClickedSubmit(true);
+    loginUser(formData);
+  };
+
   return (
     <div className={`nc-PageLogin ${className}`} data-nc-id="PageLogin">
       <Helmet>
@@ -40,7 +72,7 @@ const PageLogin: FC<PageLoginProps> = ({ className = "" }) => {
           Login
         </h2>
         <div className="max-w-md mx-auto space-y-6">
-          <div className="grid gap-3">
+          {/* <div className="grid gap-3">
             {loginSocials.map((item, index) => (
               <a
                 key={index}
@@ -57,16 +89,16 @@ const PageLogin: FC<PageLoginProps> = ({ className = "" }) => {
                 </h3>
               </a>
             ))}
-          </div>
+          </div> */}
           {/* OR */}
-          <div className="relative text-center">
+          {/* <div className="relative text-center">
             <span className="relative z-10 inline-block px-4 font-medium text-sm bg-white dark:text-neutral-400 dark:bg-neutral-900">
               OR
             </span>
             <div className="absolute left-0 w-full top-1/2 transform -translate-y-1/2 border border-neutral-100 dark:border-neutral-800"></div>
-          </div>
+          </div> */}
           {/* FORM */}
-          <form className="grid grid-cols-1 gap-6" action="#" method="post">
+          <form className="grid grid-cols-1 gap-6">
             <label className="block">
               <span className="text-neutral-800 dark:text-neutral-200">
                 Email address
@@ -74,7 +106,10 @@ const PageLogin: FC<PageLoginProps> = ({ className = "" }) => {
               <Input
                 type="email"
                 placeholder="example@example.com"
+                value={email}
+                name="email"
                 className="mt-1"
+                onChange={handleInputChange}
               />
             </label>
             <label className="block">
@@ -84,9 +119,21 @@ const PageLogin: FC<PageLoginProps> = ({ className = "" }) => {
                   Forgot password?
                 </Link>
               </span>
-              <Input type="password" className="mt-1" />
+              <Input
+                type="password"
+                className="mt-1"
+                value={password}
+                name="password"
+                onChange={handleInputChange}
+              />
             </label>
-            <ButtonPrimary type="submit">Continue</ButtonPrimary>
+            <ButtonPrimary
+              type="submit"
+              loading={loginUserStatus === "loading"}
+              onClick={handleSubmit}
+            >
+              Continue
+            </ButtonPrimary>
           </form>
 
           {/* ==== */}

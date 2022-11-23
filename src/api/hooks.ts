@@ -1,15 +1,20 @@
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useMutation, useQuery, UseQueryOptions } from "@tanstack/react-query";
 import {
   IActivityPlaces,
   IAdventureActivities,
   IGetAllActivitiesStates,
+  ILoginData,
+  ILoginFormData,
   IRentalActivities,
+  ISignUpData,
 } from "data/types";
 import {
+  createNewUser,
   getAllActivitiesPlaces,
   getAllActivitiesStates,
   getAllAdventureActivities,
   getAllRentalActivities,
+  loginUser,
 } from "./endpoints";
 
 // ---- Activity Places ----
@@ -47,3 +52,32 @@ export const useGetAllActivitiesStates = (state: string = "") =>
     ["get-individual-state-activities", state],
     () => getAllActivitiesStates(state)
   );
+
+// ---- User ----
+export const useSignUpNewUser = ({
+  onSuccess = () => null,
+}: {
+  onSuccess:
+    | ((data: ISignUpData, variables: ISignUpData, context: unknown) => unknown)
+    | undefined;
+}) =>
+  useMutation<ISignUpData, any, ISignUpData>({
+    mutationFn: (data) => createNewUser(data),
+    onSuccess,
+  });
+
+export const useLoginUser = ({
+  onSuccess = () => null,
+}: {
+  onSuccess:
+    | ((
+        data: ILoginData,
+        variables: ILoginFormData,
+        context: unknown
+      ) => unknown)
+    | undefined;
+}) =>
+  useMutation<ILoginData, any, ILoginFormData>({
+    mutationFn: (data) => loginUser(data),
+    onSuccess,
+  });

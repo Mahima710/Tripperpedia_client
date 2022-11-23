@@ -235,3 +235,28 @@ export interface IGetAllActivitiesStates {
   image: string;
   status: string;
 }
+
+export interface ISignUpForm {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  mobile_no: string;
+  dob: string;
+  confirm_password: string;
+}
+
+export interface ISignUpData extends ISignUpForm {
+  country_iso: string;
+  country_code: string;
+  device_type: "Web";
+}
+
+export interface ILoginFormData {
+  email: string;
+  password: string;
+}
+
+export interface ILoginData extends ILoginFormData {
+  fcm: string;
+}
