@@ -3,7 +3,9 @@ import {
   IActivityPlaces,
   IAdventureActivities,
   IGetAllActivitiesStates,
+  ILoginFormData,
   IRentalActivities,
+  ISignUpData,
 } from "data/types";
 
 export const API_BASE_URL = "https://admin.tripperpedia.in/api/v1";
@@ -42,4 +44,37 @@ export const getAllActivitiesStates = async (
     `${API_BASE_URL}/user/get_all_activities/${state}`
   );
   return res.data.data;
+};
+
+export const createNewUser = async (data: ISignUpData) => {
+  const formData = new FormData();
+  Object.keys(data).forEach((key) => {
+    formData.append(key, data[key as keyof ISignUpData]);
+  });
+
+  const res = await axios.post(`${API_BASE_URL}/user/signup`, formData, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return res.data;
+};
+
+export const loginUser = async (data: ILoginFormData) => {
+  const formData = new FormData();
+  Object.keys(data).forEach((key) => {
+    formData.append(key, data[key as keyof ILoginFormData]);
+  });
+
+  // TODO: Add FCM token fetching logic if needed
+  formData.append("fcm", "");
+
+  const res = await axios.post(`${API_BASE_URL}/user/login`, formData, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return res.data;
 };

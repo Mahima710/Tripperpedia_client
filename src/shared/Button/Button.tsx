@@ -3,6 +3,7 @@ import { Link, LinkProps } from "react-router-dom";
 import { LocationStates } from "routers/types";
 import twFocusClass from "utils/twFocusClass";
 
+type IOnClick = (() => void) | ((e: React.MouseEvent<any, any>) => void);
 export interface ButtonProps {
   className?: string;
   translate?: string;
@@ -14,7 +15,7 @@ export interface ButtonProps {
   type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
   href?: keyof LocationStates | "#" | LinkProps["to"];
   targetBlank?: boolean;
-  onClick?: () => void;
+  onClick?: IOnClick;
   children?: React.ReactNode;
 }
 
