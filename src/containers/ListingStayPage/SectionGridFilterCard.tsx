@@ -1,40 +1,46 @@
 import React, { FC } from "react";
 import StayCard from "components/StayCard/StayCard";
 import { DEMO_STAY_LISTINGS } from "data/listings";
-import { StayDataType } from "data/types";
+import { IGetAllActivitiesStates, IpopularActivitiesStates, StayDataType } from "data/types";
 import Pagination from "shared/Pagination/Pagination";
 import TabFilters from "./TabFilters";
 import Heading2 from "components/Heading/Heading2";
+import { useParams } from "react-router-dom";
+import ActivityStateCard from "components/Statecard/ActivityStateCard";
+import ActivityShowCard from "components/Statecard/ActivityShowCard";
 
 export interface SectionGridFilterCardProps {
+  heading?:string
   className?: string;
-  data?: StayDataType[];
+  data?: IpopularActivitiesStates[];
+  state?:string
+  filter?:boolean
 }
 
-const DEMO_DATA: StayDataType[] = DEMO_STAY_LISTINGS.filter((_, i) => i < 8);
 
 const SectionGridFilterCard: FC<SectionGridFilterCardProps> = ({
+  state,
+  heading =`Explore Activities in ${state}`,
   className = "",
-  data = DEMO_DATA,
+  data ,
+  filter = true
 }) => {
   return (
     <div
       className={`nc-SectionGridFilterCard ${className}`}
       data-nc-id="SectionGridFilterCard"
     >
-      <Heading2 />
+      <Heading2 state={state} heading={heading} count = {data?.length}/>
 
       <div className="mb-8 lg:mb-11">
-        <TabFilters />
+       {filter && data?.length!==0 && <TabFilters />}
       </div>
       <div className="grid grid-cols-1 gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {data.map((stay) => (
-          <StayCard key={stay.id} data={stay} />
+        {data?.map((stay) => (
+          <ActivityShowCard key={stay.id} data={stay} /> // data prop to be added
         ))}
       </div>
-      <div className="flex mt-16 justify-center items-center">
-        <Pagination />
-      </div>
+
     </div>
   );
 };

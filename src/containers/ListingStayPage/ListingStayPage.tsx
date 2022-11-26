@@ -6,15 +6,35 @@ import SectionSliderNewCategories from "components/SectionSliderNewCategories/Se
 import SectionSubscribe2 from "components/SectionSubscribe2/SectionSubscribe2";
 import React, { FC } from "react";
 import SectionGridFilterCard from "./SectionGridFilterCard";
-import { Helmet } from "react-helmet";
 import { useParams } from "react-router-dom";
+import {
+  useGetAllActivitiesStates,
+  useGetAllPopularActivitiesStates,
+  useGetAllRentalActivitiesStates,
+} from "api/hooks";
 
 export interface ListingStayPageProps {
   className?: string;
 }
 
 const ListingStayPage: FC<ListingStayPageProps> = ({ className = "" }) => {
-  const {state} = useParams()
+  const { state } = useParams();
+  const {
+    data: activityPlacesData,
+    status: activityPlacesStatus,
+    error: activityPlacesError,
+  } = useGetAllActivitiesStates(state);
+  const {
+    data: PopularActivityData,
+    status: PopularActivityStatus,
+    error: PopularActivityError,
+  } = useGetAllPopularActivitiesStates(state);
+  const {
+    data: RentalActivityData,
+    status: RentalActivityStatus,
+    error: RentalActivityError,
+  } = useGetAllRentalActivitiesStates(state);
+  console.log(activityPlacesData);
   return (
     <div
       className={`nc-ListingStayPage relative overflow-hidden ${className}`}
@@ -32,10 +52,25 @@ const ListingStayPage: FC<ListingStayPageProps> = ({ className = "" }) => {
         />
 
         {/* SECTION */}
-        <SectionGridFilterCard className="pb-24 lg:pb-28" />
+        {/* <SectionGridFilterCard state={state} data={activityPlacesData} className="pb-24 lg:pb-28" /> */}
+        <SectionGridFilterCard
+          state={state}
+          data={PopularActivityData}
+          className="pb-24 lg:pb-28"
+          heading={`Explore Popular Adventures in ${state}`}
+        />
+        
+
+        <SectionGridFilterCard
+          state={state}
+          data={RentalActivityData}
+          className="pb-24 lg:pb-28"
+          heading={`All Rental Activities in ${state}`}
+          filter={false}
+        />
 
         {/* SECTION 1 */}
-        <div className="relative py-16">
+        {/* <div className="relative py-16">
           <BackgroundSection />
           <SectionSliderNewCategories
             heading="Explore by types of stays"
@@ -45,16 +80,19 @@ const ListingStayPage: FC<ListingStayPageProps> = ({ className = "" }) => {
             sliderStyle="style2"
             uniqueClassName="ListingStayMapPage"
           />
-        </div>
-
-        {/* SECTION */}
-        <SectionSubscribe2 className="py-24 lg:py-28" />
+        </div> */}
 
         {/* SECTION */}
         <div className="relative py-16 mb-24 lg:mb-28">
+        <BackgroundSection  />
+        <SectionSubscribe2 className="py-24 lg:py-28" />
+        </div>
+
+        {/* SECTION */}
+        {/* <div className="relative py-16 mb-24 lg:mb-28">
           <BackgroundSection className="bg-orange-50 dark:bg-black dark:bg-opacity-20 " />
           <SectionGridAuthorBox />
-        </div>
+        </div> */}
       </div>
     </div>
   );

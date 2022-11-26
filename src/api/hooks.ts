@@ -5,6 +5,7 @@ import {
   IGetAllActivitiesStates,
   ILoginData,
   ILoginFormData,
+  IpopularActivitiesStates,
   IRentalActivities,
   ISignUpData,
 } from "data/types";
@@ -13,7 +14,9 @@ import {
   getAllActivitiesPlaces,
   getAllActivitiesStates,
   getAllAdventureActivities,
+  getAllPopularActivitiesStates,
   getAllRentalActivities,
+  getAllRentalActivitiesStates,
   loginUser,
 } from "./endpoints";
 
@@ -51,6 +54,18 @@ export const useGetAllActivitiesStates = (state: string = "") =>
   useQuery<IGetAllActivitiesStates[]>(
     ["get-individual-state-activities", state],
     () => getAllActivitiesStates(state)
+  );
+
+export const useGetAllPopularActivitiesStates = (state: string = "") =>
+  useQuery<IpopularActivitiesStates[]>(
+    ["get-all-popular-activities-states", state],
+    () => getAllPopularActivitiesStates(state)
+  );
+
+export const useGetAllRentalActivitiesStates = (state: string = "") =>
+  useQuery<IpopularActivitiesStates[]>(
+    ["get-all-rental-activities-states", state],
+    () => getAllRentalActivitiesStates(state)
   );
 
 // ---- User ----

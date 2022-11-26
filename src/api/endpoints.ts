@@ -4,6 +4,7 @@ import {
   IAdventureActivities,
   IGetAllActivitiesStates,
   ILoginFormData,
+  IpopularActivitiesStates,
   IRentalActivities,
   ISignUpData,
 } from "data/types";
@@ -42,6 +43,24 @@ export const getAllActivitiesStates = async (
 ): Promise<IGetAllActivitiesStates[]> => {
   const res = await axios.get(
     `${API_BASE_URL}/user/get_all_activities/${state}`
+  );
+  return res.data.data;
+};
+
+export const getAllPopularActivitiesStates = async (
+  state: string
+): Promise<IpopularActivitiesStates[]> => {
+  const res = await axios.get(
+    `${API_BASE_URL}/user/get_popular_activities/${state}/null`
+  );
+  return res.data.data;
+};
+
+export const getAllRentalActivitiesStates = async (
+  state: string
+): Promise<IpopularActivitiesStates[]> => {
+  const res = await axios.get(
+    `${API_BASE_URL}/user/get_all_rental_adventure_activities/${state}/null`
   );
   return res.data.data;
 };

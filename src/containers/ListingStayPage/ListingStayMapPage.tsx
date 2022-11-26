@@ -8,7 +8,6 @@ import SectionSubscribe2 from "components/SectionSubscribe2/SectionSubscribe2";
 import SectionGridHasMap from "./SectionGridHasMap";
 import { Helmet } from "react-helmet";
 import { useParams } from "react-router-dom";
-import { useGetAllActivitiesPlaces, useGetAllActivitiesStates } from "api/hooks";
 
 export interface ListingStayMapPageProps {
   className?: string;
@@ -18,7 +17,6 @@ const ListingStayMapPage: FC<ListingStayMapPageProps> = ({
   className = "",
 }) => {
   let {state} = useParams()
-  const {data: activityPlacesData, status: activityPlacesStatus, error: activityPlacesError} = useGetAllActivitiesStates(state);
   return (
     <div
       className={`nc-ListingStayMapPage relative ${className}`}

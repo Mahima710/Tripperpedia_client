@@ -236,6 +236,52 @@ export interface IGetAllActivitiesStates {
   status: string;
 }
 
+export interface Price {
+  id: number;
+  no_of_person: number;
+  admin_amount: string;
+  amount: string;
+  status: string;
+}
+
+export interface Image {
+  id: number;
+  media_path: string;
+  status: string;
+}
+
+export interface IperDay {
+  id: number;
+  admin_amount: string;
+  amount: string;
+  status: string;
+}
+
+export interface IpriceObject {
+  per_day: IperDay;
+  per_hour: IperDay;
+}
+
+export interface IpopularActivitiesStates {
+  id: number;
+  total_count: number;
+  activity_category: string;
+  activity_adventure_type: string;
+  title: string;
+  status: string;
+  state: string;
+  city: string;
+  country: string;
+  discount: string;
+  wishlist: boolean;
+  location: string;
+  latitude: string;
+  longitude: string;
+  price: Price[] | IpriceObject;
+  video: string;
+  images: Image[];
+}
+
 export interface ISignUpForm {
   first_name: string;
   last_name: string;
