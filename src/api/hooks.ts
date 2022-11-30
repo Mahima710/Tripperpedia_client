@@ -50,19 +50,29 @@ export const useGetAllRentalActivities = (
 
 //-----State Data------
 
-export const useGetAllActivitiesStates = (state: string = "") =>
+export const useGetAllActivitiesStates = (
+  state: string = "",
+  options: UseQueryOptions<IGetAllActivitiesStates[]> = {}
+) =>
   useQuery<IGetAllActivitiesStates[]>(
     ["get-individual-state-activities", state],
-    () => getAllActivitiesStates(state)
+    () => getAllActivitiesStates(state),
+    options
   );
 
-export const useGetAllPopularActivitiesStates = (state: string = "") =>
+export const useGetAllPopularActivitiesStates = (
+  state: string = "",
+  options: UseQueryOptions<IpopularActivitiesStates[]> = {}
+) =>
   useQuery<IpopularActivitiesStates[]>(
     ["get-all-popular-activities-states", state],
     () => getAllPopularActivitiesStates(state)
   );
 
-export const useGetAllRentalActivitiesStates = (state: string = "") =>
+export const useGetAllRentalActivitiesStates = (
+  state: string = "",
+  options: UseQueryOptions<IpopularActivitiesStates[]> = {}
+) =>
   useQuery<IpopularActivitiesStates[]>(
     ["get-all-rental-activities-states", state],
     () => getAllRentalActivitiesStates(state)
