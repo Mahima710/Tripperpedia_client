@@ -299,7 +299,7 @@ const TabFilters: FC<TabFiltersProps> = ({
                 <div className="overflow-hidden rounded-2xl shadow-xl bg-white dark:bg-neutral-900   border border-neutral-200 dark:border-neutral-700">
                   <div className="relative flex flex-col px-5 py-6 space-y-5">
                     <SortTab field="price" label="Price" />
-                    <SortTab field="ratings" label="Ratings" />
+                    {/* <SortTab field="ratings" label="Ratings" /> */}
 
                     {/* <NcInputNumber label="Beds" max={10} />
                     <NcInputNumber label="Bedrooms" max={10} />
@@ -750,7 +750,7 @@ const TabFilters: FC<TabFiltersProps> = ({
                         <div className="mt-6 relative flex flex-col space-y-5">
                           {/* <NcInputNumber label="Beds" max={10} /> */}
                           <SortTab field="price" label="Price" />
-                          <SortTab field="ratings" label="Ratings" />
+                          {/* <SortTab field="ratings" label="Ratings" /> */}
                           {/* <NcInputNumber label="Bedrooms" max={10} />
                           <NcInputNumber label="Bathrooms" max={10} /> */}
                         </div>
