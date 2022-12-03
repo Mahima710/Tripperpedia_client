@@ -195,15 +195,9 @@ export interface PerDay {
   status: string;
 }
 
-export interface Price {
+export interface PriceRental {
   per_hour: PerHour;
   per_day: PerDay;
-}
-
-export interface Image {
-  id: number;
-  media_path: string;
-  status: string;
 }
 
 export interface IRentalActivities {
@@ -236,17 +230,11 @@ export interface IGetAllActivitiesStates {
   status: string;
 }
 
-export interface Price {
+export interface PriceAdventure {
   id: number;
   no_of_person: number;
   admin_amount: string;
   amount: string;
-  status: string;
-}
-
-export interface Image {
-  id: number;
-  media_path: string;
   status: string;
 }
 
@@ -280,6 +268,131 @@ export interface IpopularActivitiesStates {
   price: Price[] | IpriceObject;
   video: string;
   images: Image[];
+}
+
+export interface VendorBusinessDetail {
+  location: string;
+  latitude: string;
+  longitude: string;
+  business_name?: string;
+}
+
+export interface User {
+  country: string;
+  state: string;
+  city: string;
+  vendor_business_detail: VendorBusinessDetail;
+}
+
+export interface Activity {
+  id: number;
+  title: string;
+  image: string;
+  status: string;
+}
+
+export interface Brand {
+  id: number;
+  name: string;
+  status: string;
+}
+
+export interface Model {
+  id: number;
+  name: string;
+  type: string;
+  status: string;
+}
+
+export interface VehicleDetail {
+  id: number;
+  year: number;
+  registration_no: string;
+  status: string;
+}
+
+export interface Video {
+  id: number;
+  media_path: string;
+  status: string;
+}
+
+export interface PerDay {
+  id: number;
+  amount: string;
+  vendor_amount: string;
+  status: string;
+}
+
+export interface WhatToTake {
+  id: number;
+  name: string;
+  status: string;
+}
+
+export interface ThingServiceIncluded {
+  id: number;
+  name: string;
+  status: string;
+}
+
+export interface AddOn {
+  id: number;
+  item: string;
+  price: string;
+  quantity: number;
+  status: string;
+}
+
+export interface ListDate {
+  id: number;
+  start_date: string;
+  end_date: string;
+  status: string;
+}
+
+export interface Slot {
+  activity_time_sheet_times_id: number;
+  start_time: string;
+  end_time: string;
+  quantity: number;
+  status: string;
+}
+
+export interface ActivitySlotData {
+  activity_time_sheet_id: number;
+  slot_type: string;
+  slot: Slot[];
+}
+
+export interface IActivityDetail {
+  id: number;
+  activity_category: string;
+  title: string;
+  quantity: number;
+  description: string;
+  warning: string;
+  status: string;
+  discount: string;
+  wishlist: boolean;
+  user: User;
+  activity: Activity;
+  brand: Brand;
+  age_from: number;
+  age_to: number;
+  model: Model;
+  vehicle_details: VehicleDetail[];
+  images: Image[];
+  video: Video;
+  list_date: ListDate[];
+  price: PriceAdventure[] | PriceRental;
+  what_to_take: WhatToTake[];
+  thing_service_included: ThingServiceIncluded[];
+  activity_slot_data: ActivitySlotData;
+  add_ons: AddOn[];
+  bookings: any[];
+  rating?: any;
+  reviews: number;
 }
 
 export interface ISignUpForm {

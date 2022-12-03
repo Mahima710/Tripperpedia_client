@@ -59,7 +59,6 @@ const ListingStayPage: FC<ListingStayPageProps> = ({ className = "" }) => {
           className="pb-24 lg:pb-28"
           heading={`Explore Popular Adventures in ${state}`}
         />
-        
 
         <SectionGridFilterCard
           state={state}
@@ -84,8 +83,8 @@ const ListingStayPage: FC<ListingStayPageProps> = ({ className = "" }) => {
 
         {/* SECTION */}
         <div className="relative py-16 mb-24 lg:mb-28">
-        <BackgroundSection  />
-        <SectionSubscribe2 className="py-24 lg:py-28" />
+          <BackgroundSection />
+          <SectionSubscribe2 className="py-24 lg:py-28" />
         </div>
 
         {/* SECTION */}

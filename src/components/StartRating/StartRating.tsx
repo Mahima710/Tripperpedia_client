@@ -10,7 +10,7 @@ export interface StartRatingProps {
 const StartRating: FC<StartRatingProps> = ({
   className = "",
   point = 4.5,
-  reviewCount = 112,
+  reviewCount = 0,
 }) => {
   return (
     <div
@@ -21,9 +21,11 @@ const StartRating: FC<StartRatingProps> = ({
         <StarIcon className="w-[18px] h-[18px] text-orange-500" />
       </div>
       <span className="font-medium ">{point}</span>
-      <span className="text-neutral-500 dark:text-neutral-400">
-        ({reviewCount})
-      </span>
+      {reviewCount !== 0 && (
+        <span className="text-neutral-500 dark:text-neutral-400">
+          ({reviewCount})
+        </span>
+      )}
     </div>
   );
 };

@@ -16,7 +16,7 @@ export interface ListingStayMapPageProps {
 const ListingStayMapPage: FC<ListingStayMapPageProps> = ({
   className = "",
 }) => {
-  let {state} = useParams()
+  let { state } = useParams();
   return (
     <div
       className={`nc-ListingStayMapPage relative ${className}`}
@@ -26,7 +26,11 @@ const ListingStayMapPage: FC<ListingStayMapPageProps> = ({
 
       {/* SECTION HERO */}
       <div className="container pt-10 pb-24 lg:pt-16 lg:pb-28">
-        <SectionHeroArchivePage currentPage="Adventure" currentTab="Adventure" state={state} />
+        <SectionHeroArchivePage
+          currentPage="Adventure"
+          currentTab="Adventure"
+          state={state}
+        />
       </div>
 
       {/* SECTION */}

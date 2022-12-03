@@ -41,7 +41,10 @@ const AdventureSearchForm: FC<AdventureSearchFormProps> = ({
 
   const renderForm = () => {
     return (
-      <form className="relative mt-8 flex rounded-full shadow-xl dark:shadow-2xl bg-white dark:bg-neutral-800 " style={{width:"65vw"}}>
+      <form
+        className="relative mt-8 flex rounded-full shadow-xl dark:shadow-2xl bg-white dark:bg-neutral-800 "
+        style={{ width: "65vw" }}
+      >
         <LocationInput
           defaultValue={locationInputValue}
           onChange={(e) => setLocationInputValue(e)}

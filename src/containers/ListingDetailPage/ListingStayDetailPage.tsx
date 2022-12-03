@@ -1,5 +1,8 @@
-import React, { FC, Fragment, useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
+import React, { FC, Fragment, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Dialog, Popover, Transition } from "@headlessui/react";
+import NcInputNumber from "components/NcInputNumber/NcInputNumber";
+import ButtonThird from "shared/Button/ButtonThird";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import LocationMarker from "components/AnyReactComponent/LocationMarker";
 import CommentListing from "components/CommentListing/CommentListing";
@@ -15,6 +18,7 @@ import {
   isInclusivelyAfterDay,
 } from "react-dates";
 import Avatar from "shared/Avatar/Avatar";
+import Checkbox from "shared/Checkbox/Checkbox";
 import Badge from "shared/Badge/Badge";
 import ButtonCircle from "shared/Button/ButtonCircle";
 import ButtonPrimary from "shared/Button/ButtonPrimary";
@@ -27,25 +31,28 @@ import ModalPhotos from "./ModalPhotos";
 import BackgroundSection from "components/BackgroundSection/BackgroundSection";
 import SectionSliderNewCategories from "components/SectionSliderNewCategories/SectionSliderNewCategories";
 import SectionSubscribe2 from "components/SectionSubscribe2/SectionSubscribe2";
-import StayDatesRangeInput from "components/HeroSearchForm/StayDatesRangeInput";
 import MobileFooterSticky from "./MobileFooterSticky";
+import { useParams } from "react-router-dom";
+import { useGetActivityDetail } from "api/hooks";
+import {
+  ActivitySlotData,
+  IActivityDetail,
+  PriceAdventure,
+  PriceRental,
+} from "data/types";
+import { useQueryClient } from "@tanstack/react-query";
+import Radio from "shared/Checkbox/Radio";
+import DatePickerInput from "components/HeroSearchForm/DatePicker";
 
 export interface ListingStayDetailPageProps {
   className?: string;
   isPreviewMode?: boolean;
 }
 
-const PHOTOS: string[] = [
-  "https://images.pexels.com/photos/6129967/pexels-photo-6129967.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260",
-  "https://images.pexels.com/photos/7163619/pexels-photo-7163619.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-  "https://images.pexels.com/photos/6527036/pexels-photo-6527036.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-  "https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-  "https://images.pexels.com/photos/6438752/pexels-photo-6438752.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-  "https://images.pexels.com/photos/1320686/pexels-photo-1320686.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-  "https://images.pexels.com/photos/261394/pexels-photo-261394.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-  "https://images.pexels.com/photos/2861361/pexels-photo-2861361.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-  "https://images.pexels.com/photos/2677398/pexels-photo-2677398.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-];
+export interface SlotRange {
+  startTime: moment.Moment | null;
+  endTime: moment.Moment | null;
+}
 
 const Amenities_demos = [
   { name: "la-key", icon: "la-key" },
@@ -81,15 +88,127 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
   className = "",
   isPreviewMode,
 }) => {
+  const { Category, id } = useParams();
+  var PriceToAdd: { [key: string]: number } = {};
+
   const [isOpen, setIsOpen] = useState(false);
   const [openFocusIndex, setOpenFocusIndex] = useState(0);
+  const [startDate, setStartDate] = useState<moment.Moment | null>(null);
+  const [slot, setSlot] = useState<SlotRange | null>(null);
+  const [message, setMessage] = useState("");
   const [selectedDate, setSelectedDate] = useState<DateRage>({
-    startDate: moment().add(4, "days"),
-    endDate: moment().add(10, "days"),
+    startDate: null,
+    endDate: null,
   });
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
   const [focusedInputSectionCheckDate, setFocusedInputSectionCheckDate] =
     useState<FocusedInputShape>("startDate");
   let [isOpenModalAmenities, setIsOpenModalAmenities] = useState(false);
+  const renderPriceInitial = () => {
+    if (
+      queryClient.getQueryData([
+        "get-activity-details",
+        Category,
+        id,
+      ]) as IActivityDetail
+    ) {
+      if (
+        (
+          queryClient.getQueryData([
+            "get-activity-details",
+            Category,
+            id,
+          ]) as IActivityDetail
+        )?.activity_category === "Adventure"
+      ) {
+        return (
+          +(
+            (
+              queryClient.getQueryData([
+                "get-activity-details",
+                Category,
+                id,
+              ]) as IActivityDetail
+            )?.price as PriceAdventure[]
+          )[0].amount || 0
+        );
+        //return +(activityDetailData?.price as PriceAdventure[])[0].amount || 0;
+      } else
+        return (
+          +(
+            (
+              queryClient.getQueryData([
+                "get-activity-details",
+                Category,
+                id,
+              ]) as IActivityDetail
+            )?.price as PriceRental
+          ).per_day.amount || 0
+        );
+    } //+(activityDetailData?.price as PriceRental).per_day.amount || 0;
+    return 0;
+  };
+
+  const [finalPriceSelected, setFinalPriceSelected] = useState(
+    renderPriceInitial()
+  ); //selected from price list
+  const [addOns, setAddOns] = useState({} as { [key: string]: number });
+  const [finalPricePlan, setFinalPricePlan] = useState(finalPriceSelected); //multiply with duration
+  const [finalPrice, setFinalPrice] = useState(finalPricePlan); //after adding all charges
+  const [AddOnPrice, setAddOnPrice] = useState(0);
+  const [duration, setDuration] = useState(1);
+  const {
+    data: activityDetailData,
+    status: activityDetailStatus,
+    error: activityDetailError,
+  } = useGetActivityDetail(Category, id, {
+    onSuccess: (data) => {
+      data.activity_category === "Adventure" &&
+        setFinalPriceSelected(+(data.price as PriceAdventure[])[0].amount);
+      data.activity_category === "Rental" &&
+        setFinalPriceSelected(+(data.price as PriceRental).per_day.amount);
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    setFinalPricePlan(finalPriceSelected * duration);
+    setFinalPrice(finalPricePlan + AddOnPrice);
+    if (AddOnPrice === 0) {
+      setFinalPrice(finalPricePlan);
+    }
+  }, [finalPriceSelected, duration, finalPricePlan, AddOnPrice]);
+
+  const [typeOfCharge, setTypeOfCharge] = useState("day");
+
+  const navigateToCheckout = () => {
+    console.log(duration);
+    if (duration <= 0) {
+      return setMessage("Invalid Duration");
+    }
+    if (startDate === null && selectedDate.startDate === null) {
+      return setMessage("Please Select Date");
+    }
+    const title = activityDetailData?.title;
+    const vars = {
+      Category,
+      title,
+      finalPrice,
+      finalPricePlan,
+      finalPriceSelected,
+      AddOnPrice,
+      addOns,
+      slot,
+      duration,
+      startDate,
+      typeOfCharge,
+      selectedDate,
+    };
+    const encoded = btoa(JSON.stringify(vars));
+    navigate(`/checkout/${encoded}`);
+  };
 
   const windowSize = useWindowSize();
 
@@ -119,6 +238,242 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
     setOpenFocusIndex(index);
   };
 
+  const renderDateAdventure = () => {
+    return (
+      <Popover className="relative">
+        {({ open, close }) => (
+          <>
+            <Popover.Button
+              className={`flex items-center justify-center px-4 py-2 text-sm rounded-full border border-neutral-300 dark:border-neutral-700 focus:outline-none ${
+                open ? "!border-primary-500 " : ""
+              }`}
+            >
+              <span>
+                {startDate
+                  ? moment(startDate).format("DD/MM/YYYY")
+                  : `Select Date of Adventure`}
+              </span>
+              <i className="las la-angle-down ml-2"></i>
+            </Popover.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-200"
+              enterFrom="opacity-0 translate-y-1"
+              enterTo="opacity-100 translate-y-0"
+              leave="transition ease-in duration-150"
+              leaveFrom="opacity-100 translate-y-0"
+              leaveTo="opacity-0 translate-y-1"
+            >
+              <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 left-0 sm:px-0 lg:max-w-md">
+                <div className="overflow-hidden rounded-2xl shadow-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700">
+                  <div className="relative flex flex-col px-5 py-6 space-y-5">
+                    {activityDetailData?.list_date.length !== 0
+                      ? activityDetailData?.list_date.map((item) => (
+                          <div key={item.start_date} className="">
+                            <Checkbox
+                              name="check"
+                              label={`${item.start_date}`}
+                              onChange={(checked) => {
+                                setStartDate(moment(item.start_date));
+                              }}
+                            />
+                          </div>
+                        ))
+                      : "No Dates Available"}
+                  </div>
+                  <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
+                    <ButtonThird
+                      onClick={() => {
+                        setStartDate(null);
+                        close();
+                      }}
+                      sizeClass="px-4 py-2 sm:px-5"
+                    >
+                      Clear
+                    </ButtonThird>
+                    <ButtonPrimary
+                      onClick={close}
+                      sizeClass="px-4 py-2 sm:px-5"
+                    >
+                      Apply
+                    </ButtonPrimary>
+                  </div>
+                </div>
+              </Popover.Panel>
+            </Transition>
+          </>
+        )}
+      </Popover>
+    );
+  };
+
+  const renderSlots = () => {
+    return (
+      <Popover className="relative">
+        {({ open, close }) => (
+          <>
+            <Popover.Button
+              className={`flex items-center justify-center px-4 py-2 text-sm rounded-full border border-neutral-300 dark:border-neutral-700 focus:outline-none ${
+                open ? "!border-primary-500 " : ""
+              }`}
+            >
+              <span>
+                {slot
+                  ? `${moment(slot.startTime).format("H:mm:ss")} - ${moment(
+                      slot.endTime
+                    ).format("H:mm:ss")}`
+                  : `Select Slot`}
+              </span>
+              <i className="las la-angle-down ml-2"></i>
+            </Popover.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-200"
+              enterFrom="opacity-0 translate-y-1"
+              enterTo="opacity-100 translate-y-0"
+              leave="transition ease-in duration-150"
+              leaveFrom="opacity-100 translate-y-0"
+              leaveTo="opacity-0 translate-y-1"
+            >
+              <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 left-0 sm:px-0 lg:max-w-md">
+                <div className="overflow-hidden rounded-2xl shadow-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700">
+                  <div className="relative flex flex-col px-5 py-6 space-y-5">
+                    {activityDetailData?.activity_slot_data?.slot?.length !==
+                    0 ? (
+                      <div className="">
+                        {activityDetailData?.activity_slot_data.slot.map(
+                          (item) => {
+                            return (
+                              <Radio
+                                //make onchange
+                                item={item}
+                                onChange={() => {
+                                  setSlot({
+                                    startTime: moment(
+                                      item.start_time,
+                                      "HH:mm:ss"
+                                    ),
+                                    endTime: moment(item.end_time, "HH:mm:ss"),
+                                  });
+                                }}
+                              />
+                            );
+                          }
+                        )}
+                      </div>
+                    ) : (
+                      "No Slots Available"
+                    )}
+                  </div>
+                  <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
+                    <ButtonThird
+                      onClick={() => {
+                        setSlot(null);
+                      }}
+                      sizeClass="px-4 py-2 sm:px-5"
+                    >
+                      Clear
+                    </ButtonThird>
+                    <ButtonPrimary
+                      onClick={close}
+                      sizeClass="px-4 py-2 sm:px-5"
+                    >
+                      Apply
+                    </ButtonPrimary>
+                  </div>
+                </div>
+              </Popover.Panel>
+            </Transition>
+          </>
+        )}
+      </Popover>
+    );
+  };
+
+  const renderAddOns = () => {
+    return (
+      <Popover className="relative">
+        {({ open, close }) => (
+          <>
+            <Popover.Button
+              className={`flex items-center justify-center px-4 py-2 text-sm rounded-full border border-neutral-300 dark:border-neutral-700 focus:outline-none ${
+                open ? "!border-primary-500 " : ""
+              }`}
+            >
+              <span>Add Ons</span>
+              <i className="las la-angle-down ml-2"></i>
+            </Popover.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-200"
+              enterFrom="opacity-0 translate-y-1"
+              enterTo="opacity-100 translate-y-0"
+              leave="transition ease-in duration-150"
+              leaveFrom="opacity-100 translate-y-0"
+              leaveTo="opacity-0 translate-y-1"
+            >
+              <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 left-0 sm:px-0 lg:max-w-md">
+                <div className="overflow-hidden rounded-2xl shadow-xl bg-white dark:bg-neutral-900   border border-neutral-200 dark:border-neutral-700">
+                  <div className="relative flex flex-col px-5 py-6 space-y-5">
+                    {activityDetailData?.add_ons.map((item) => {
+                      return (
+                        <NcInputNumber
+                          label={`${item.item} RS.${item.price}`}
+                          max={item.quantity}
+                          onChange={(value) => {
+                            PriceToAdd[item.item] = value * +item.price;
+                          }}
+                          defaultValue={
+                            item.item in addOns
+                              ? addOns[item.item] / +item.price
+                              : 0
+                          }
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
+                    <ButtonThird
+                      onClick={async () => {
+                        await setAddOnPrice(0);
+                        PriceToAdd = {};
+                        setAddOns({});
+                        close();
+                      }}
+                      sizeClass="px-4 py-2 sm:px-5"
+                    >
+                      Clear
+                    </ButtonThird>
+                    <ButtonPrimary
+                      onClick={async () => {
+                        console.log(PriceToAdd);
+                        let totalPrice = 0;
+                        for (const key in PriceToAdd) {
+                          addOns[key] = PriceToAdd[key];
+                        }
+                        for (const key in addOns) {
+                          console.log(addOns[key]);
+                          totalPrice += addOns[key];
+                        }
+                        console.log(totalPrice);
+                        await setAddOnPrice(totalPrice);
+                        //await setFinalPrice(AddOnPrice + finalPricePlan); //Add Other prices also if applicable
+                        close();
+                      }}
+                      sizeClass="px-4 py-2 sm:px-5"
+                    >
+                      Apply
+                    </ButtonPrimary>
+                  </div>
+                </div>
+              </Popover.Panel>
+            </Transition>
+          </>
+        )}
+      </Popover>
+    );
+  };
+
   const handleCloseModal = () => setIsOpen(false);
 
   const renderSection1 = () => {
@@ -126,22 +481,29 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
       <div className="listingSection__wrap !space-y-6">
         {/* 1 */}
         <div className="flex justify-between items-center">
-          <Badge name="Wooden house" />
-          <LikeSaveBtns />
+          <Badge name={`${activityDetailData?.activity_category}`} />
+          {/* <LikeSaveBtns /> */}
         </div>
 
         {/* 2 */}
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold">
-          Beach House in Collingwood
+          {activityDetailData?.title}
         </h2>
 
         {/* 3 */}
         <div className="flex items-center space-x-4">
-          <StartRating />
-          <span>·</span>
+          {activityDetailData?.rating && (
+            <StartRating point={activityDetailData?.rating} />
+          )}
+
           <span>
             <i className="las la-map-marker-alt"></i>
-            <span className="ml-1"> Tokyo, Jappan</span>
+            <span className="ml-1">
+              {" "}
+              {activityDetailData
+                ? `${activityDetailData?.user.city} . ${activityDetailData?.user.state} . ${activityDetailData?.user.country}`
+                : "Location"}
+            </span>
           </span>
         </div>
 
@@ -151,7 +513,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
           <span className="ml-2.5 text-neutral-500 dark:text-neutral-400">
             Hosted by{" "}
             <span className="text-neutral-900 dark:text-neutral-200 font-medium">
-              Kevin Francis
+              {activityDetailData?.user.vendor_business_detail.business_name
+                ? activityDetailData?.user.vendor_business_detail.business_name
+                : `Local Travels of ${activityDetailData?.user.vendor_business_detail.location}`}
             </span>
           </span>
         </div>
@@ -164,25 +528,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
           <div className="flex items-center space-x-3 ">
             <i className=" las la-user text-2xl "></i>
             <span className="">
-              6 <span className="hidden sm:inline-block">guests</span>
+              {activityDetailData?.reviews}{" "}
+              <span className="hidden sm:inline-block">reviews</span>
             </span>
           </div>
           <div className="flex items-center space-x-3">
-            <i className=" las la-bed text-2xl"></i>
+            {/* <i className=" las la-bed text-2xl"></i> */}
             <span className=" ">
-              6 <span className="hidden sm:inline-block">beds</span>
-            </span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <i className=" las la-bath text-2xl"></i>
-            <span className=" ">
-              3 <span className="hidden sm:inline-block">baths</span>
-            </span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <i className=" las la-door-open text-2xl"></i>
-            <span className=" ">
-              2 <span className="hidden sm:inline-block">bedrooms</span>
+              {/* 6 <span className="hidden sm:inline-block">beds</span> */}
             </span>
           </div>
         </div>
@@ -193,27 +546,63 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
   const renderSection2 = () => {
     return (
       <div className="listingSection__wrap">
-        <h2 className="text-2xl font-semibold">Stay information</h2>
+        <h2 className="text-2xl font-semibold">Activity Highlight</h2>
         <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
         <div className="text-neutral-6000 dark:text-neutral-300">
-          <span>
-            Providing lake views, The Symphony 9 Tam Coc in Ninh Binh provides
-            accommodation, an outdoor swimming pool, a bar, a shared lounge, a
-            garden and barbecue facilities. Complimentary WiFi is provided.
-          </span>
-          <br />
-          <br />
-          <span>
-            There is a private bathroom with bidet in all units, along with a
-            hairdryer and free toiletries.
-          </span>
-          <br /> <br />
-          <span>
-            The Symphony 9 Tam Coc offers a terrace. Both a bicycle rental
-            service and a car rental service are available at the accommodation,
-            while cycling can be enjoyed nearby.
-          </span>
+          <span>{activityDetailData?.description}</span>
         </div>
+        {activityDetailData?.thing_service_included.length !== 0 && (
+          <>
+            <h2 className="text-xl font-semibold">Amenities Included</h2>
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 text-sm text-neutral-700 dark:text-neutral-300 ">
+              {activityDetailData?.thing_service_included.map((item) => (
+                <div key={item.name} className="flex items-center space-x-3">
+                  <i className={`text-3xl las la-suitcase-rolling`}></i>
+                  <span className=" ">{item.name}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        {activityDetailData?.model && (
+          <>
+            <h2 className="text-xl font-semibold">Vehicle Details</h2>
+            <div className="grid grid-cols-3 xl:grid-cols-3 gap-6 text-sm text-neutral-700 dark:text-neutral-300 ">
+              <div
+                key={activityDetailData.model.name}
+                className="flex items-center space-x-3"
+              >
+                <i className={`text-3xl las la-car`}></i>
+                <span className=" ">
+                  Model : {activityDetailData.model.name}
+                </span>
+              </div>
+              <div
+                key={activityDetailData.model.type}
+                className="flex items-center space-x-3"
+              >
+                <i className={`text-3xl las la-car`}></i>
+
+                <span className=" ">
+                  Type : {activityDetailData.model.type}
+                </span>
+              </div>
+
+              {activityDetailData?.brand.name && (
+                <div
+                  key={activityDetailData.brand.name}
+                  className="flex items-center space-x-3"
+                >
+                  <i className={`text-3xl las la-car`}></i>
+
+                  <span className=" ">
+                    Brand : {activityDetailData.brand.name}
+                  </span>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     );
   };
@@ -322,12 +711,153 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
     );
   };
 
+  const renderAdventurePrices = (items: PriceAdventure[]) => {
+    return (
+      <div
+        className={`text-sm sm:text-base text-neutral-6000 dark:text-neutral-300 -mb-4`}
+      >
+        {items.map((item, index) => {
+          return (
+            <div
+              className={`p-4  flex justify-between items-center space-x-4 rounded-lg ${
+                index % 2 === 0 ? "bg-neutral-200 dark:bg-neutral-800" : ""
+              }`}
+            >
+              <span>
+                {+item.admin_amount - +item.amount > 0 && (
+                  <Badge
+                    color="green"
+                    name={`${Math.floor(
+                      ((+item.admin_amount - +item.amount) /
+                        +item.admin_amount) *
+                        100
+                    )} % OFF`}
+                  />
+                )}
+              </span>
+              <span className="block mt-2 w-40">
+                <p className="text-neutral-500 dark:text-neutral-400">
+                  {" "}
+                  <s>INR {item.admin_amount}</s>{" "}
+                </p>
+
+                {`₹${item.amount} /${item.no_of_person} person`}
+              </span>
+
+              <span>
+                <ButtonPrimary
+                  className="bg-primary-6000"
+                  onClick={() => {
+                    setFinalPriceSelected(+item.amount);
+                  }}
+                >
+                  Apply
+                </ButtonPrimary>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderRentalPrices = (items: PriceRental) => {
+    return (
+      <div
+        className={`text-sm sm:text-base text-neutral-6000 dark:text-neutral-300 -mb-4`}
+      >
+        <div
+          className={`p-4  flex justify-between items-center space-x-4 rounded-lg`}
+        >
+          <span>
+            {+items.per_day.admin_amount - +items.per_day.amount > 0 && (
+              <Badge
+                color="green"
+                name={`${
+                  ((+items.per_day.admin_amount - +items.per_day.amount) /
+                    +items.per_day.admin_amount) *
+                  100
+                } % OFF`}
+              />
+            )}
+          </span>
+
+          {items.per_day.amount && (
+            <>
+              <span className="block mt-2 w-40">
+                {items.per_day.admin_amount && (
+                  <p className="text-neutral-500 dark:text-neutral-400">
+                    {" "}
+                    <s>INR {items.per_day.admin_amount}</s>{" "}
+                  </p>
+                )}
+                {`₹${items.per_day.amount} / day`}
+              </span>
+              <span>
+                <ButtonPrimary
+                  className="bg-primary-6000 "
+                  onClick={() => {
+                    setFinalPriceSelected(+items.per_day.amount);
+                    setTypeOfCharge("day");
+                  }}
+                >
+                  Apply
+                </ButtonPrimary>
+              </span>
+            </>
+          )}
+        </div>
+
+        <div
+          className={`p-4  flex justify-between items-center space-x-4 rounded-lg bg-neutral-200 dark:bg-neutral-800`}
+        >
+          <span>
+            {+items.per_hour.admin_amount - +items.per_hour.amount > 0 && (
+              <Badge
+                color="green"
+                name={`${
+                  ((+items.per_hour.admin_amount - +items.per_hour.amount) /
+                    +items.per_hour.admin_amount) *
+                  100
+                } % OFF`}
+              />
+            )}
+          </span>
+          {items.per_hour.amount && (
+            <>
+              <span className="block mt-2 w-40">
+                {items.per_hour.admin_amount && (
+                  <p className="text-neutral-500 dark:text-neutral-400">
+                    {" "}
+                    <s>INR {items.per_hour.admin_amount}</s>{" "}
+                  </p>
+                )}
+                {`₹${items.per_hour.amount} / hour`}
+              </span>
+              <span>
+                <ButtonPrimary
+                  className="bg-primary-6000 "
+                  onClick={() => {
+                    setFinalPriceSelected(+items.per_hour.amount);
+                    setTypeOfCharge("hour");
+                  }}
+                >
+                  Apply
+                </ButtonPrimary>
+              </span>
+            </>
+          )}{" "}
+        </div>
+      </div>
+    );
+  };
+
   const renderSection4 = () => {
     return (
       <div className="listingSection__wrap">
         {/* HEADING */}
         <div>
-          <h2 className="text-2xl font-semibold">Room Rates </h2>
+          <h2 className="text-2xl font-semibold">Prices </h2>
           <span className="block mt-2 text-neutral-500 dark:text-neutral-400">
             Prices may increase on weekends or holidays
           </span>
@@ -335,7 +865,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
         <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
         {/* CONTENT */}
         <div className="flow-root">
-          <div className="text-sm sm:text-base text-neutral-6000 dark:text-neutral-300 -mb-4">
+          {/* <div className="text-sm sm:text-base text-neutral-6000 dark:text-neutral-300 -mb-4">
             <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
               <span>Monday - Thursday</span>
               <span>$199</span>
@@ -360,7 +890,13 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
               <span>Max number of nights</span>
               <span>90 nights</span>
             </div>
-          </div>
+          </div> */}
+          {activityDetailData?.activity_category === "Adventure" &&
+            activityDetailData?.price &&
+            renderAdventurePrices(activityDetailData.price as PriceAdventure[])}
+          {activityDetailData?.activity_category === "Rental" &&
+            activityDetailData.price &&
+            renderRentalPrices(activityDetailData.price as PriceRental)}
         </div>
       </div>
     );
@@ -562,11 +1098,26 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
               yesIWantToUseGoogleMapApiInternals
               defaultZoom={15}
               defaultCenter={{
-                lat: 55.9607277,
-                lng: 36.2172614,
+                lat: activityDetailData?.user.vendor_business_detail?.latitude
+                  ? +activityDetailData?.user.vendor_business_detail.latitude
+                  : 55.9607277,
+                lng: activityDetailData?.user.vendor_business_detail?.longitude
+                  ? +activityDetailData?.user.vendor_business_detail.longitude
+                  : 36.2172614,
               }}
             >
-              <LocationMarker lat={55.9607277} lng={36.2172614} />
+              <LocationMarker
+                lat={
+                  activityDetailData?.user.vendor_business_detail?.latitude
+                    ? +activityDetailData?.user.vendor_business_detail.latitude
+                    : 55.9607277
+                }
+                lng={
+                  activityDetailData?.user.vendor_business_detail?.longitude
+                    ? +activityDetailData?.user.vendor_business_detail.longitude
+                    : 36.2172614
+                }
+              />
             </GoogleMapReact>
           </div>
         </div>
@@ -583,98 +1134,151 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
 
         {/* CONTENT */}
         <div>
-          <h4 className="text-lg font-semibold">Cancellation policy</h4>
-          <span className="block mt-3 text-neutral-500 dark:text-neutral-400">
-            Refund 50% of the booking value when customers cancel the room
-            within 48 hours after successful booking and 14 days before the
-            check-in time. <br />
-            Then, cancel the room 14 days before the check-in time, get a 50%
-            refund of the total amount paid (minus the service fee).
-          </span>
+          {activityDetailData?.warning && (
+            <>
+              <h4 className="text-lg font-semibold">Warning</h4>
+              <span className="block mt-3 text-neutral-500 dark:text-neutral-400">
+                {activityDetailData?.warning}
+              </span>
+              <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
+            </>
+          )}
         </div>
-        <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
 
         {/* CONTENT */}
-        <div>
-          <h4 className="text-lg font-semibold">Check-in time</h4>
-          <div className="mt-3 text-neutral-500 dark:text-neutral-400 max-w-md text-sm sm:text-base">
-            <div className="flex space-x-10 justify-between p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
-              <span>Check-in</span>
-              <span>08:00 am - 12:00 am</span>
+        {activityDetailData?.what_to_take.length !== 0 && (
+          <>
+            <div>
+              <h4 className="text-lg font-semibold">
+                Suggested things to bring
+              </h4>
+              <div className="mt-3 text-neutral-500 dark:text-neutral-400 max-w-md text-sm sm:text-base">
+                {activityDetailData?.what_to_take.map((item, index) => {
+                  return (
+                    <div
+                      className={`flex space-x-10 justify-between p-3 ${
+                        index % 2 === 0
+                          ? "bg-neutral-100 dark:bg-neutral-800 rounded-lg"
+                          : ""
+                      }`}
+                    >
+                      <span></span>
+                      <span>
+                        <i className="text-2xl las la-suitcase"></i>
+                      </span>
+                      <span>{item.name}</span>
+                      <span></span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex space-x-10 justify-between p-3">
-              <span>Check-out</span>
-              <span>02:00 pm - 04:00 pm</span>
-            </div>
-          </div>
-        </div>
-        <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
-
-        {/* CONTENT */}
-        <div>
-          <h4 className="text-lg font-semibold">Special Note</h4>
-          <div className="prose sm:prose">
-            <ul className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2">
-              <li>
-                Ban and I will work together to keep the landscape and
-                environment green and clean by not littering, not using
-                stimulants and respecting people around.
-              </li>
-              <li>Do not sing karaoke past 11:30</li>
-            </ul>
-          </div>
-        </div>
+            <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
+          </>
+        )}
       </div>
     );
   };
 
   const renderSidebar = () => {
     return (
-      <div className="listingSectionSidebar__wrap shadow-xl">
+      <div className="listingSectionSidebar__wrap shadow-xl pb-5">
         {/* PRICE */}
         <div className="flex justify-between">
           <span className="text-3xl font-semibold">
-            $119
+            INR {finalPrice}
             <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
-              /night
+              {activityDetailData?.activity_category === "Adventure"
+                ? ``
+                : `/${typeOfCharge}`}
             </span>
           </span>
-          <StartRating />
+          {activityDetailData?.rating !== 0 && (
+            <StartRating point={activityDetailData?.rating} />
+          )}
         </div>
 
         {/* FORM */}
         <form className="flex flex-col border border-neutral-200 dark:border-neutral-700 rounded-3xl ">
-          <StayDatesRangeInput
-            wrapClassName="divide-x divide-neutral-200 dark:divide-neutral-700 !grid-cols-1 sm:!grid-cols-2"
-            onChange={(date) => setSelectedDate(date)}
-            fieldClassName="p-3"
-            defaultValue={selectedDate}
-            anchorDirection={"right"}
-            className="nc-ListingStayDetailPage__stayDatesRangeInput flex-1"
-          />
-          <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
-         
-        </form>
+          {activityDetailData?.activity_category === "Rental" && (
+            <>
+              <DatePickerInput
+                onChange={(date) => {
+                  setStartDate(date);
+                }}
+                wrapClassName="divide-x divide-neutral-200 dark:divide-neutral-700 !grid-cols-1 sm:!grid-cols-2"
+                anchorDirection={"right"}
+                className="nc-ListingStayDetailPage__stayDatesRangeInput flex-1"
+              />
+            </>
+          )}
+          {/* {activityDetailData?.activity_category === "Adventure" && 
 
+          } */}
+          <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
+        </form>
+        <input
+          className="p-3"
+          placeholder={`Duration in ${
+            activityDetailData?.activity_category === "Rental" &&
+            typeOfCharge === "hour"
+              ? "hours"
+              : "Days"
+          }`}
+          type="number"
+          onChange={(e) => {
+            setDuration(+e.target.value);
+          }}
+        />
+
+        {activityDetailData?.activity_category === "Adventure" ? (
+          activityDetailData?.list_date.length !== 0 ? (
+            renderDateAdventure()
+          ) : (
+            <DatePickerInput
+              onChange={(date) => {
+                setStartDate(date);
+              }}
+              wrapClassName="divide-x divide-neutral-200 dark:divide-neutral-700 !grid-cols-1 sm:!grid-cols-2"
+              anchorDirection={"right"}
+              className="nc-ListingStayDetailPage__stayDatesRangeInput flex-1"
+            />
+          )
+        ) : (
+          ""
+        )}
+        <div className="flex gap-10 ">
+          {activityDetailData?.activity_category === "Adventure"
+            ? (activityDetailData?.activity_slot_data as ActivitySlotData).slot
+              ? renderSlots()
+              : ""
+            : ""}
+          {renderAddOns()}
+        </div>
         {/* SUM */}
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-2">
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
-            <span>$119 x 3 night</span>
-            <span>$357</span>
+            <span>{`${finalPriceSelected} x ${duration}`}</span>
+            <span>{finalPricePlan}</span>
           </div>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>Service charge</span>
-            <span>$0</span>
+            <span>0</span>
+          </div>
+          <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
+            <span>Add Ons</span>
+            <span>{AddOnPrice}</span>
           </div>
           <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
           <div className="flex justify-between font-semibold">
             <span>Total</span>
-            <span>$199</span>
+            <span>INR {finalPrice}</span>
           </div>
         </div>
 
         {/* SUBMIT */}
-        <ButtonPrimary href={"/checkout"}>Reserve</ButtonPrimary>
+        <ButtonPrimary onClick={navigateToCheckout}>Reserve</ButtonPrimary>
+        <p className="text-red-500">{message}</p>
       </div>
     );
   };
@@ -687,7 +1291,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
       {/* SINGLE HEADER */}
       <>
         <header className="container 2xl:px-14 rounded-md sm:rounded-xl">
-          <div className="relative grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
+          <div className="relative grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-2">
             <div
               className="col-span-2 row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden cursor-pointer"
               onClick={() => handleOpenModal(0)}
@@ -695,30 +1299,34 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
               <NcImage
                 containerClassName="absolute inset-0"
                 className="object-cover w-full h-full rounded-md sm:rounded-xl"
-                src={PHOTOS[0]}
+                src={
+                  (activityDetailData as IActivityDetail)?.images[0].media_path
+                }
               />
               <div className="absolute inset-0 bg-neutral-900 bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity"></div>
             </div>
-            {PHOTOS.filter((_, i) => i >= 1 && i < 5).map((item, index) => (
-              <div
-                key={index}
-                className={`relative rounded-md sm:rounded-xl overflow-hidden ${
-                  index >= 3 ? "hidden sm:block" : ""
-                }`}
-              >
-                <NcImage
-                  containerClassName="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5"
-                  className="object-cover w-full h-full rounded-md sm:rounded-xl "
-                  src={item || ""}
-                />
-
-                {/* OVERLAY */}
+            {(activityDetailData as IActivityDetail)?.images
+              .filter((_, i) => i >= 1 && i < 3)
+              .map((item, index) => (
                 <div
-                  className="absolute inset-0 bg-neutral-900 bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                  onClick={() => handleOpenModal(index + 1)}
-                />
-              </div>
-            ))}
+                  key={index}
+                  className={`relative rounded-md sm:rounded-xl overflow-hidden ${
+                    index >= 3 ? "hidden sm:block" : ""
+                  }`}
+                >
+                  <NcImage
+                    containerClassName="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5"
+                    className="object-cover w-full  h-full rounded-md sm:rounded-xl "
+                    src={item.media_path || ""}
+                  />
+
+                  {/* OVERLAY */}
+                  <div
+                    className="absolute inset-0 bg-neutral-900 bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                    onClick={() => handleOpenModal(index + 1)}
+                  />
+                </div>
+              ))}
 
             <div
               className="absolute hidden md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 cursor-pointer hover:bg-neutral-200 z-10"
@@ -746,7 +1354,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
         </header>
         {/* MODAL PHOTOS */}
         <ModalPhotos
-          imgs={PHOTOS}
+          imgs={activityDetailData?.images.map((item) => {
+            return item.media_path;
+          })}
           isOpen={isOpen}
           onClose={handleCloseModal}
           initFocus={openFocusIndex}
@@ -760,11 +1370,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
         <div className="w-full lg:w-3/5 xl:w-2/3 space-y-8 lg:space-y-10 lg:pr-10">
           {renderSection1()}
           {renderSection2()}
-          {renderSection3()}
+          {/* {renderSection3()} */}
           {renderSection4()}
-          {renderSectionCheckIndate()}
-          {renderSection5()}
-          {renderSection6()}
+          {/* {renderSectionCheckIndate()} */}
+          {/* {renderSection5()} */}
+          {/* {renderSection6()} */}
           {renderSection7()}
           {renderSection8()}
         </div>
@@ -784,18 +1394,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({
           {/* SECTION 1 */}
           <div className="relative py-16">
             <BackgroundSection />
-            <SectionSliderNewCategories
-              heading="Explore by types of stays"
-              subHeading="Explore houses based on 10 types of stays"
-              categoryCardType="card5"
-              itemPerRow={5}
-              sliderStyle="style2"
-              uniqueClassName={"ListingStayDetailPage1"}
-            />
+            <SectionSubscribe2 className="pt-24 lg:pt-32" />
           </div>
 
           {/* SECTION */}
-          <SectionSubscribe2 className="pt-24 lg:pt-32" />
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { Tab } from "@headlessui/react";
+import { useLocation, useParams } from "react-router-dom";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import React, { FC, Fragment, useState } from "react";
 import visaPng from "images/vis.png";
@@ -31,8 +32,88 @@ const CheckOutPage: FC<CheckOutPageProps> = ({ className = "" }) => {
     guestChildren: 1,
     guestInfants: 1,
   });
+  const { encode } = useParams();
+  console.log(encode);
+  const data = JSON.parse(atob(encode as string));
+
+  console.log(data);
 
   const renderSidebar = () => {
+    return (
+      <div className="listingSectionSidebar__wrap shadow-xl">
+        {/* PRICE */}
+        <div className="flex justify-between">
+          <span className="text-3xl font-semibold">{data.title}</span>
+        </div>
+
+        {/* FORM */}
+        {/* <div className="flex flex-col border border-neutral-200 dark:border-neutral-700 rounded-3xl p-3">
+          {data.startDate
+            ? moment(data.startDate).format("DD-MM-YYYY")
+            : `${moment(data.selectedDate.startDate).format(
+                "DD-MM-YYYY"
+              )} - ${moment(data.selectedDate.endDate).format("DD-MM-YYYY")}`} */}
+
+        {/* {Category === "Adventure" && 
+
+          } */}
+        {/* <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
+        </div>
+        <input
+          className="p-3"
+          placeholder={`${data.duration} ${
+            data.Category === "Rental" && data.typeOfCharge === "hour"
+              ? "hour"
+              : "Day"
+          }`}
+          disabled
+        /> */}
+
+        {/* {Category === "Adventure" ? (
+          activityDetailData?.list_date.length !== 0 ? (
+            renderDateAdventure()
+          ) : (
+            <DatePickerInput
+              onChange={(date) => {
+                setStartDate(date);
+              }}
+              wrapClassName="divide-x divide-neutral-200 dark:divide-neutral-700 !grid-cols-1 sm:!grid-cols-2"
+              anchorDirection={"right"}
+              className="nc-ListingStayDetailPage__stayDatesRangeInput flex-1"
+            />
+          )
+        ) : (
+          ""
+        )} */}
+        <h3 className="text-2xl font-semibold">Price detail</h3>
+
+        {/* SUM */}
+        <div className="flex flex-col space-y-2">
+          <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
+            <span>{`${data.finalPriceSelected} x ${data.duration}`}</span>
+            <span>{data.finalPricePlan}</span>
+          </div>
+          <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
+            <span>Service charge</span>
+            <span>0</span>
+          </div>
+          <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
+            <span>Add Ons</span>
+            <span>{data.AddOnPrice}</span>
+          </div>
+          <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
+          <div className="flex justify-between font-semibold">
+            <span>Total</span>
+            <span>INR {data.finalPrice}</span>
+          </div>
+        </div>
+
+        {/* SUBMIT */}
+        {/* <ButtonPrimary onClick={navigateToCheckout}>Reserve</ButtonPrimary> */}
+      </div>
+    );
+  };
+  const renderSidebar1 = () => {
     return (
       <div className="w-full flex flex-col sm:rounded-2xl lg:border border-neutral-200 dark:border-neutral-700 space-y-6 sm:space-y-8 px-0 sm:p-6 xl:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center">
@@ -87,7 +168,7 @@ const CheckOutPage: FC<CheckOutPageProps> = ({ className = "" }) => {
         <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
         <div>
           <div>
-            <h3 className="text-2xl font-semibold">Your trip</h3>
+            <h3 className="text-2xl font-semibold">{`Your ${data.Category}`}</h3>
             <NcModal
               renderTrigger={(openModal) => (
                 <span
@@ -102,27 +183,32 @@ const CheckOutPage: FC<CheckOutPageProps> = ({ className = "" }) => {
             />
           </div>
           <div className="mt-6 border border-neutral-200 dark:border-neutral-700 rounded-3xl flex flex-col sm:flex-row divide-y sm:divide-x sm:divide-y-0 divide-neutral-200 dark:divide-neutral-700">
-            <ModalSelectDate
-              defaultValue={rangeDates}
-              onSelectDate={setRangeDates}
-              renderChildren={({ openModal }) => (
-                <button
-                  onClick={openModal}
-                  className="text-left flex-1 p-5 flex justify-between space-x-5 "
-                  type="button"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-sm text-neutral-400">Date</span>
-                    <span className="mt-1.5 text-lg font-semibold">
-                      {converSelectedDateToString(rangeDates)}
-                    </span>
-                  </div>
-                  <PencilSquareIcon className="w-6 h-6 text-neutral-6000 dark:text-neutral-400" />
-                </button>
-              )}
-            />
+            <div className="flex flex-col p-4">
+              <span className="text-sm text-neutral-400">Date</span>
+              <span className="mt-1.5 text-lg font-semibold">
+                {data.startDate
+                  ? moment(data.startDate).format("DD-MM-YYYY")
+                  : `${moment(data.selectedDate.startDate).format(
+                      "DD-MM-YYYY"
+                    )} - ${moment(data.selectedDate.endDate).format(
+                      "DD-MM-YYYY"
+                    )}`}
+              </span>
+            </div>
+            {data.slot ? (
+              <div className="flex flex-col p-4">
+                <span className="text-sm text-neutral-400">Slot</span>
+                <span className="mt-1.5 text-lg font-semibold">
+                  {`${moment(data.slot.startTime).format(
+                    "hh:MM:ss"
+                  )} - ${moment(data.slot.endTime).format("hh:MM:ss")}`}
+                </span>
+              </div>
+            ) : (
+              ""
+            )}
 
-            <ModalSelectGuests
+            {/* <ModalSelectGuests
               defaultValue={guests}
               onChangeGuests={setGuests}
               renderChildren={({ openModal }) => (
@@ -145,7 +231,7 @@ const CheckOutPage: FC<CheckOutPageProps> = ({ className = "" }) => {
                   <PencilSquareIcon className="w-6 h-6 text-neutral-6000 dark:text-neutral-400" />
                 </button>
               )}
-            />
+            /> */}
           </div>
         </div>
 

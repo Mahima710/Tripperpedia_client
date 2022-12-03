@@ -1,5 +1,6 @@
 import { useMutation, useQuery, UseQueryOptions } from "@tanstack/react-query";
 import {
+  IActivityDetail,
   IActivityPlaces,
   IAdventureActivities,
   IGetAllActivitiesStates,
@@ -8,9 +9,11 @@ import {
   IpopularActivitiesStates,
   IRentalActivities,
   ISignUpData,
+  PriceAdventure,
 } from "data/types";
 import {
   createNewUser,
+  getActivityDetail,
   getAllActivitiesPlaces,
   getAllActivitiesStates,
   getAllAdventureActivities,
@@ -66,6 +69,29 @@ export const useGetAllRentalActivitiesStates = (state: string = "") =>
   useQuery<IpopularActivitiesStates[]>(
     ["get-all-rental-activities-states", state],
     () => getAllRentalActivitiesStates(state)
+  );
+
+export const useGetActivityDetail = (
+  Category: string = "",
+  id: string = "0",
+  options: UseQueryOptions<IActivityDetail> = {}
+) =>
+  useQuery<IActivityDetail>(
+    ["get-activity-details", Category, id],
+    () => getActivityDetail(Category, id),
+    {
+      select: (data) => {
+        // var SortedPrice = activityDetailData?.price;
+        if (Category === "Adventure") {
+          const SortedPrice = (data.price as PriceAdventure[]).sort(
+            (a, b) => a.no_of_person - b.no_of_person
+          );
+          return { ...data, price: SortedPrice };
+        }
+        return data;
+      },
+      ...options,
+    }
   );
 
 // ---- User ----

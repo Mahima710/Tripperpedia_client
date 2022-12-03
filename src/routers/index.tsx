@@ -51,7 +51,7 @@ export const pages: Page[] = [
   //
   { path: "/activities_places/:state", component: ListingStayPage },
   { path: "/listing-stay-map", component: ListingStayMapPage },
-  { path: "/listing-stay-detail", component: ListingStayDetailPage },
+  { path: "/activity-detail/:Category/:id", component: ListingStayDetailPage },
   //
   {
     path: "/listing-experiences",
@@ -72,7 +72,7 @@ export const pages: Page[] = [
   //
   { path: "/listing-flights", component: ListingFlightsPage },
   //
-  { path: "/checkout", component: CheckOutPage },
+  { path: "/checkout/:encode", component: CheckOutPage },
   { path: "/pay-done", component: PayPage },
   //
   { path: "/author", component: AuthorPage },

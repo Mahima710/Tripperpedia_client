@@ -6,7 +6,7 @@ import Glide from "@glidejs/glide";
 import NcImage from "shared/NcImage/NcImage";
 
 export interface ModalPhotosProps {
-  imgs: string[];
+  imgs?: string[];
   onClose: () => void;
   isOpen: boolean;
   initFocus?: number;
@@ -54,7 +54,7 @@ const ModalPhotos: FC<ModalPhotosProps> = ({
           className="controls_nav glide__bullets mb-4"
           data-glide-el="controls[nav]"
         >
-          {imgs.map((_, index) => (
+          {imgs?.map((_, index) => (
             <div key={index} className="text-center hidden text-sm">
               <span className="text-xl font-semibold"> {index + 1}</span>
               <span> / {imgs.length}</span>
@@ -68,7 +68,7 @@ const ModalPhotos: FC<ModalPhotosProps> = ({
           data-glide-el="track"
         >
           <ul className="glide__slides h-full ">
-            {imgs.map((item, index) => (
+            {imgs?.map((item, index) => (
               <li className="glide__slide relative h-full" key={index}>
                 <NcImage
                   src={item}

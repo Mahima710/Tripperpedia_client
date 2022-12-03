@@ -13,6 +13,7 @@ export interface LocationStates {
   "/activities_places/:state"?: {};
   "/listing-stay-map"?: {};
   "/listing-stay-detail"?: {};
+  "/activity-detail/:Category/:id"?: {};
   //
   "/listing-experiences"?: {};
   "/listing-experiences-map"?: {};
@@ -26,7 +27,7 @@ export interface LocationStates {
   "/listing-car-map"?: {};
   "/listing-car-detail"?: {};
   //
-  "/checkout"?: {};
+  "/checkout/:encode"?: {};
   "/pay-done"?: {};
   //
   "/account"?: {};

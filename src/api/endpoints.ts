@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+  IActivityDetail,
   IActivityPlaces,
   IAdventureActivities,
   IGetAllActivitiesStates,
@@ -61,6 +62,16 @@ export const getAllRentalActivitiesStates = async (
 ): Promise<IpopularActivitiesStates[]> => {
   const res = await axios.get(
     `${API_BASE_URL}/user/get_all_rental_adventure_activities/${state}/null`
+  );
+  return res.data.data;
+};
+
+export const getActivityDetail = async (
+  Category: string,
+  id: string
+): Promise<IActivityDetail> => {
+  const res = await axios.get(
+    `${API_BASE_URL}/user/get_activity_detail/${Category}/${id}`
   );
   return res.data.data;
 };
