@@ -12,6 +12,7 @@ import Heading2 from "components/Heading/Heading2";
 import { useParams } from "react-router-dom";
 import ActivityStateCard from "components/Statecard/ActivityStateCard";
 import ActivityShowCard from "components/Statecard/ActivityShowCard";
+import { SORT_ORDER } from "hooks/useFilters";
 
 export interface SectionGridFilterCardProps {
   heading?: string;
@@ -19,6 +20,15 @@ export interface SectionGridFilterCardProps {
   data?: IpopularActivitiesStates[];
   state?: string;
   filter?: boolean;
+  filterData?: () => void;
+  applyFilter?: (filter: string, value: any) => void;
+  removeFilter?: (filter: string) => void;
+  removeFilterValue?: (filter: string, value: any) => void;
+  sortData?: () => void;
+  applySortFilter?: (field: string, order: SORT_ORDER) => void;
+  sortConfigs?: Record<string, SORT_ORDER>;
+  resetSort?: (resetConfig?: boolean) => any[];
+  resetData?: () => void;
 }
 
 const SectionGridFilterCard: FC<SectionGridFilterCardProps> = ({
@@ -27,6 +37,7 @@ const SectionGridFilterCard: FC<SectionGridFilterCardProps> = ({
   className = "",
   data,
   filter = true,
+  ...filterProps
 }) => {
   return (
     <div
@@ -36,7 +47,7 @@ const SectionGridFilterCard: FC<SectionGridFilterCardProps> = ({
       <Heading2 state={state} heading={heading} count={data?.length} />
 
       <div className="mb-8 lg:mb-11">
-        {filter && data?.length !== 0 && <TabFilters />}
+        {filter && <TabFilters {...filterProps} />}
       </div>
       <div className="grid grid-cols-1 gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {data?.map((stay) => (
