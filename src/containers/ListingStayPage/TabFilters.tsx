@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { FC, Fragment, useState } from "react";
 import { Dialog, Popover, Transition } from "@headlessui/react";
 import NcInputNumber from "components/NcInputNumber/NcInputNumber";
 import ButtonPrimary from "shared/Button/ButtonPrimary";
@@ -7,15 +7,18 @@ import ButtonClose from "shared/ButtonClose/ButtonClose";
 import Checkbox from "shared/Checkbox/Checkbox";
 import Slider from "rc-slider";
 import convertNumbThousand from "utils/convertNumbThousand";
+import { SORT_ORDER } from "hooks/useFilters";
+
+type sortFilterType = "ASCENDING" | "DESCENDING" | "NONE";
 
 // DEMO DATA
 const typeOfPaces = [
   {
-    name: "Entire place",
+    name: "Adventure",
     description: "Have a place to yourself",
   },
   {
-    name: "Private room",
+    name: "Rental",
     description: "Have your own room and share some common spaces",
   },
   {
@@ -65,17 +68,130 @@ const moreFilter3 = [
 
 const moreFilter4 = [{ name: " Pets allowed" }, { name: "Smoking allowed" }];
 
-const TabFilters = () => {
+export interface TabFiltersProps {
+  filterData?: () => void;
+  applyFilter?: (filter: string, value: any) => void;
+  removeFilter?: (filter: string) => void;
+  removeFilterValue?: (filter: string, value: any) => void;
+  sortData?: () => void;
+  applySortFilter?: (field: string, order: SORT_ORDER) => void;
+  sortConfigs?: Record<string, SORT_ORDER>;
+  resetSort?: (resetConfig?: boolean) => any[];
+  resetData?: () => void;
+}
+
+const TabFilters: FC<TabFiltersProps> = ({
+  applyFilter,
+  filterData,
+  removeFilter,
+  removeFilterValue,
+  sortData,
+  applySortFilter,
+  sortConfigs,
+  resetSort,
+  resetData,
+}) => {
+  const initCheckedState = () => {
+    const temp: Record<string, boolean> = {};
+    typeOfPaces.forEach((i) => (temp[i.name] = false));
+
+    return temp;
+  };
   const [isOpenMoreFilter, setisOpenMoreFilter] = useState(false);
   const [isOpenMoreFilterMobile, setisOpenMoreFilterMobile] = useState(false);
   const [rangePrices, setRangePrices] = useState([0, 1000]);
-
+  const [checkedState, setCheckedState] = useState(initCheckedState());
+  // const [sortFilters, setSortFilters] = useState<
+  //   Record<string, sortFilterType>
+  // >({});
   //
   const closeModalMoreFilter = () => setisOpenMoreFilter(false);
   const openModalMoreFilter = () => setisOpenMoreFilter(true);
   //
   const closeModalMoreFilterMobile = () => setisOpenMoreFilterMobile(false);
   const openModalMoreFilterMobile = () => setisOpenMoreFilterMobile(true);
+
+  const handleApplyModalMoreFilterMobile = () => {
+    applyFilterFunctions();
+    applyPriceFilter();
+    applySort();
+    closeModalMoreFilterMobile();
+  };
+
+  const handleResetModalMoreFilterMobile = () => {
+    resetData?.();
+    closeModalMoreFilterMobile();
+  };
+
+  const handleCheckBox = (name: any, checked: boolean) => {
+    if (checked) {
+      setCheckedState({
+        ...checkedState,
+        [name]: true,
+      });
+      applyFilter?.("activity_category", name);
+    } else {
+      setCheckedState({
+        ...checkedState,
+        [name]: false,
+      });
+      removeFilterValue?.("activity_category", name);
+    }
+  };
+
+  const applyPriceFilter = (close?: Function) => {
+    filterData?.();
+    if (close) close();
+  };
+
+  const clearPriceFilter = (close?: Function) => {
+    setRangePrices([0, 1000]);
+    removeFilter?.("price");
+    filterData?.();
+    if (close) close();
+  };
+
+  const applySort = (close?: Function) => {
+    sortData?.();
+    if (close) close();
+  };
+
+  const applyFilterFunctions = (close?: Function) => {
+    filterData?.();
+    if (close) close();
+  };
+
+  const SortTab = ({ field, label }: { field: string; label: string }) => {
+    return (
+      <div className="flex flex-row justify-between w-full items-center">
+        <p className="font-medium text-neutral-800 dark:text-neutral-200">
+          {label}
+        </p>
+        <div className="flex flex-row m-0 ">
+          <button
+            className={`nc-Button relative h-auto inline-flex items-center justify-center transition-colors text-sm sm:text-sm font-medium px-2 py-1 sm:px-5  ttnc-ButtonPrimary disabled:bg-opacity-70 ${
+              sortConfigs?.[field] === "ASCENDING"
+                ? "bg-primary-6000"
+                : "bg-slate-800"
+            } hover:bg-primary-700 text-neutral-50  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-6000 dark:focus:ring-offset-0`}
+            onClick={() => applySortFilter?.(field, "ASCENDING")}
+          >
+            Ascending
+          </button>
+          <button
+            className={`nc-Button relative h-auto inline-flex items-center justify-center transition-colors text-sm sm:text-sm font-medium px-2 py-1 sm:px-5  ttnc-ButtonPrimary disabled:bg-opacity-70 ${
+              sortConfigs?.[field] === "DESCENDING"
+                ? "bg-primary-6000"
+                : "bg-slate-800"
+            } hover:bg-primary-700 text-neutral-50  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-6000 dark:focus:ring-offset-0`}
+            onClick={() => applySortFilter?.(field, "DESCENDING")}
+          >
+            Descending
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const renderXClear = () => {
     return (
@@ -106,7 +222,7 @@ const TabFilters = () => {
                 open ? "!border-primary-500 " : ""
               }`}
             >
-              <span>Type of place</span>
+              <span>Categories</span>
               <i className="las la-angle-down ml-2"></i>
             </Popover.Button>
             <Transition
@@ -127,6 +243,10 @@ const TabFilters = () => {
                           name={item.name}
                           label={item.name}
                           subLabel={item.description}
+                          defaultChecked={checkedState[item.name]}
+                          onChange={(checked) => {
+                            handleCheckBox(item.name, checked);
+                          }}
                         />
                       </div>
                     ))}
@@ -136,7 +256,9 @@ const TabFilters = () => {
                       Clear
                     </ButtonThird>
                     <ButtonPrimary
-                      onClick={close}
+                      onClick={() => {
+                        applyFilterFunctions(close);
+                      }}
                       sizeClass="px-4 py-2 sm:px-5"
                     >
                       Apply
@@ -151,7 +273,7 @@ const TabFilters = () => {
     );
   };
 
-  const renderTabsRoomAndBeds = () => {
+  const renderSortFilters = () => {
     return (
       <Popover className="relative">
         {({ open, close }) => (
@@ -161,7 +283,7 @@ const TabFilters = () => {
                 open ? "!border-primary-500 " : ""
               }`}
             >
-              <span>Rooms of Beds</span>
+              <span>Sort</span>
               <i className="las la-angle-down ml-2"></i>
             </Popover.Button>
             <Transition
@@ -176,16 +298,27 @@ const TabFilters = () => {
               <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 left-0 sm:px-0 lg:max-w-md">
                 <div className="overflow-hidden rounded-2xl shadow-xl bg-white dark:bg-neutral-900   border border-neutral-200 dark:border-neutral-700">
                   <div className="relative flex flex-col px-5 py-6 space-y-5">
-                    <NcInputNumber label="Beds" max={10} />
+                    <SortTab field="price" label="Price" />
+                    {/* <SortTab field="ratings" label="Ratings" /> */}
+
+                    {/* <NcInputNumber label="Beds" max={10} />
                     <NcInputNumber label="Bedrooms" max={10} />
-                    <NcInputNumber label="Bathrooms" max={10} />
+                    <NcInputNumber label="Bathrooms" max={10} /> */}
                   </div>
                   <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
-                    <ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
+                    <ButtonThird
+                      onClick={() => {
+                        resetSort?.();
+                        close();
+                      }}
+                      sizeClass="px-4 py-2 sm:px-5"
+                    >
                       Clear
                     </ButtonThird>
                     <ButtonPrimary
-                      onClick={close}
+                      onClick={() => {
+                        applySort(close);
+                      }}
                       sizeClass="px-4 py-2 sm:px-5"
                     >
                       Apply
@@ -233,10 +366,13 @@ const TabFilters = () => {
                         range
                         className="text-red-400"
                         min={0}
-                        max={2000}
+                        max={20000}
                         defaultValue={[rangePrices[0], rangePrices[1]]}
                         allowCross={false}
-                        onChange={(e) => setRangePrices(e as number[])}
+                        onChange={(e) => {
+                          setRangePrices(e as number[]);
+                          applyFilter?.("price", e);
+                        }}
                       />
                     </div>
 
@@ -290,11 +426,18 @@ const TabFilters = () => {
                     </div>
                   </div>
                   <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
-                    <ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
+                    <ButtonThird
+                      onClick={() => {
+                        clearPriceFilter(close);
+                      }}
+                      sizeClass="px-4 py-2 sm:px-5"
+                    >
                       Clear
                     </ButtonThird>
                     <ButtonPrimary
-                      onClick={close}
+                      onClick={() => {
+                        applyPriceFilter(close);
+                      }}
                       sizeClass="px-4 py-2 sm:px-5"
                     >
                       Apply
@@ -325,7 +468,10 @@ const TabFilters = () => {
               key={item.name}
               name={item.name}
               label={item.name}
-              defaultChecked={!!item.defaultChecked}
+              defaultChecked={checkedState[item.name]}
+              onChange={(checked) => {
+                handleCheckBox(item.name, checked);
+              }}
             />
           ))}
         </div>
@@ -335,7 +481,10 @@ const TabFilters = () => {
               key={item.name}
               name={item.name}
               label={item.name}
-              defaultChecked={!!item.defaultChecked}
+              defaultChecked={checkedState[item.name]}
+              onChange={(checked) => {
+                handleCheckBox(item.name, checked);
+              }}
             />
           ))}
         </div>
@@ -533,10 +682,13 @@ const TabFilters = () => {
                                 range
                                 className="text-red-400"
                                 min={0}
-                                max={2000}
-                                defaultValue={[0, 1000]}
+                                max={20000}
+                                defaultValue={[rangePrices[0], rangePrices[1]]}
                                 allowCross={false}
-                                onChange={(e) => setRangePrices(e as number[])}
+                                onChange={(e) => {
+                                  setRangePrices(e as number[]);
+                                  applyFilter?.("price", e);
+                                }}
                               />
                             </div>
 
@@ -594,57 +746,59 @@ const TabFilters = () => {
 
                       {/* ---- */}
                       <div className="py-7">
-                        <h3 className="text-xl font-medium">Rooms and beds</h3>
+                        <h3 className="text-xl font-medium">Sort</h3>
                         <div className="mt-6 relative flex flex-col space-y-5">
-                          <NcInputNumber label="Beds" max={10} />
-                          <NcInputNumber label="Bedrooms" max={10} />
-                          <NcInputNumber label="Bathrooms" max={10} />
+                          {/* <NcInputNumber label="Beds" max={10} /> */}
+                          <SortTab field="price" label="Price" />
+                          {/* <SortTab field="ratings" label="Ratings" /> */}
+                          {/* <NcInputNumber label="Bedrooms" max={10} />
+                          <NcInputNumber label="Bathrooms" max={10} /> */}
                         </div>
                       </div>
 
                       {/* ---- */}
-                      <div className="py-7">
+                      {/* <div className="py-7">
                         <h3 className="text-xl font-medium">Amenities</h3>
                         <div className="mt-6 relative ">
                           {renderMoreFilterItem(moreFilter1)}
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* ---- */}
-                      <div className="py-7">
+                      {/* <div className="py-7">
                         <h3 className="text-xl font-medium">Facilities</h3>
                         <div className="mt-6 relative ">
                           {renderMoreFilterItem(moreFilter2)}
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* ---- */}
-                      <div className="py-7">
+                      {/* <div className="py-7">
                         <h3 className="text-xl font-medium">Property type</h3>
                         <div className="mt-6 relative ">
                           {renderMoreFilterItem(moreFilter3)}
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* ---- */}
-                      <div className="py-7">
+                      {/* <div className="py-7">
                         <h3 className="text-xl font-medium">House rules</h3>
                         <div className="mt-6 relative ">
                           {renderMoreFilterItem(moreFilter4)}
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
                   <div className="p-4 sm:p-6 flex-shrink-0 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
                     <ButtonThird
-                      onClick={closeModalMoreFilterMobile}
+                      onClick={handleResetModalMoreFilterMobile}
                       sizeClass="px-4 py-2 sm:px-5"
                     >
                       Clear
                     </ButtonThird>
                     <ButtonPrimary
-                      onClick={closeModalMoreFilterMobile}
+                      onClick={handleApplyModalMoreFilterMobile}
                       sizeClass="px-4 py-2 sm:px-5"
                     >
                       Apply
@@ -664,8 +818,8 @@ const TabFilters = () => {
       <div className="hidden lg:flex space-x-4">
         {renderTabsTypeOfPlace()}
         {renderTabsPriceRage()}
-        {renderTabsRoomAndBeds()}
-        {renderTabMoreFilter()}
+        {renderSortFilters()}
+        {/* {renderTabMoreFilter()} */}
       </div>
       {renderTabMoreFilterMobile()}
     </div>

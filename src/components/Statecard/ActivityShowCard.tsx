@@ -1,7 +1,12 @@
 import React, { FC } from "react";
 import GallerySlider from "components/GallerySlider/GallerySlider";
 import { DEMO_STAY_LISTINGS } from "data/listings";
-import { IpopularActivitiesStates, IpriceObject, Price, StayDataType } from "data/types";
+import {
+  IpopularActivitiesStates,
+  IpriceObject,
+  Price,
+  StayDataType,
+} from "data/types";
 import StartRating from "components/StartRating/StartRating";
 import { Link } from "react-router-dom";
 import BtnLikeIcon from "components/BtnLikeIcon/BtnLikeIcon";
@@ -23,17 +28,17 @@ const ActivityShowCard: FC<StayCardProps> = ({
 }) => {
   const {
     id,
-  activity_category,
-  title,
-  status,
-  state,
-  city,
-  country,
-  discount,
-  wishlist,
-  location,
-  price,
-  images
+    activity_category,
+    title,
+    status,
+    state,
+    city,
+    country,
+    discount,
+    wishlist,
+    location,
+    price,
+    images,
   } = data as IpopularActivitiesStates;
 
   const renderSliderGallery = () => {
@@ -42,13 +47,21 @@ const ActivityShowCard: FC<StayCardProps> = ({
         <GallerySlider
           uniqueID={`StayCard_${id}`}
           ratioClass="aspect-w-4 aspect-h-3 "
-          galleryImgs={images.map(image=>{
-            return image.media_path
+          galleryImgs={images.map((image) => {
+            return image.media_path;
           })}
           href={"#"}
         />
-        <BtnLikeIcon isLiked={wishlist} className="absolute right-3 top-3 z-[1]" />
-        {discount!=="0.00" && <SaleOffBadge className="absolute left-3 top-3" desc={`${discount}% off`} />}
+        <BtnLikeIcon
+          isLiked={wishlist}
+          className="absolute right-3 top-3 z-[1]"
+        />
+        {discount !== "0.00" && (
+          <SaleOffBadge
+            className="absolute left-3 top-3"
+            desc={`${discount}% off`}
+          />
+        )}
       </div>
     );
   };
@@ -93,13 +106,16 @@ const ActivityShowCard: FC<StayCardProps> = ({
                 />
               </svg>
             )}
-            <span className="">{city} . {state}</span>
+            <span className="">
+              {city} . {state}
+            </span>
           </div>
         </div>
         <div className="w-14 border-b border-neutral-100 dark:border-neutral-800"></div>
         <div className="flex justify-between items-center">
           <span className="text-base font-semibold">
-            {(price as Price[])[0]?.amount||(price as IpriceObject)?.per_day.amount }
+            {(price as Price[])[0]?.amount ||
+              (price as IpriceObject)?.per_day.amount}
             {` `}
             {size === "default" && (
               <span className="text-sm text-neutral-500 dark:text-neutral-400 font-normal">

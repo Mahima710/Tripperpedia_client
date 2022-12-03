@@ -35,7 +35,7 @@ const GallerySlider: FC<GallerySliderProps> = ({
       MY_GLIDEJS.mount();
     }, 10);
   }, [MY_GLIDEJS, UNIQUE_CLASS]);
-  console.log(galleryImgs)
+
   const renderDots = () => {
     return (
       <div
@@ -61,10 +61,9 @@ const GallerySlider: FC<GallerySliderProps> = ({
             {galleryImgs.map((item, index) => (
               <li key={index} className="glide__slide">
                 <>
-                {console.log(item," item")}
-                <Link to={href} className={`block ${ratioClass}`}>
-                  <NcImage src={item} />
-                </Link>
+                  <Link to={href} className={`block ${ratioClass}`}>
+                    <NcImage src={item} />
+                  </Link>
                 </>
               </li>
             ))}
