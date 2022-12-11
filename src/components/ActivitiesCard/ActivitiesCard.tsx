@@ -1,7 +1,12 @@
 import React, { FC } from "react";
 import GallerySlider from "components/GallerySlider/GallerySlider";
 import { DEMO_STAY_LISTINGS } from "data/listings";
-import { IAdventureActivities, IRentalActivities, Price, StayDataType } from "data/types";
+import {
+  IAdventureActivities,
+  IRentalActivities,
+  Price,
+  StayDataType,
+} from "data/types";
 import StartRating from "components/StartRating/StartRating";
 import { Link } from "react-router-dom";
 import BtnLikeIcon from "components/BtnLikeIcon/BtnLikeIcon";
@@ -23,6 +28,7 @@ const ActivitiesCard: FC<ActivitiesCardProps> = ({
   data,
 }) => {
   const {
+    activity_category,
     images,
     state,
     city,
@@ -32,22 +38,27 @@ const ActivitiesCard: FC<ActivitiesCardProps> = ({
     video,
     id,
     reviews,
-    rating
+    rating,
   } = data;
 
+  //localhost:3000/activity-detail/Adventure/3
+
   const renderSliderGallery = () => {
-    const href = "/"
+    const href = `/activity-detail/${activity_category}/${id}`;
     return (
       <div className="relative w-full">
         <GallerySlider
           uniqueID={`ActivitiesCard_${id}`}
           ratioClass="aspect-w-4 aspect-h-3 "
-          galleryImgs={images.map((img)=>{
-            return(img.media_path)
+          galleryImgs={images.map((img) => {
+            return img.media_path;
           })}
           href={href}
         />
-        <BtnLikeIcon isLiked={rating} className="absolute right-3 top-3 z-[1]" />
+        <BtnLikeIcon
+          isLiked={rating}
+          className="absolute right-3 top-3 z-[1]"
+        />
         {discount && <SaleOffBadge className="absolute left-3 top-3" />}
       </div>
     );
@@ -100,23 +111,23 @@ const ActivitiesCard: FC<ActivitiesCardProps> = ({
         <div className="flex justify-between items-center">
           <div className="text-base font-semibold">
             <>
-            {typeof(price) === "object"? (price as Price).admin_amount: (price as Price[])[0].admin_amount}
-            {` `}
-            {size === "default" && (
-              <span className="text-sm text-neutral-500 dark:text-neutral-400 font-normal">
-                /night
-              </span>
-            )}
+              {typeof price === "object"
+                ? (price as Price).admin_amount
+                : (price as Price[])[0].admin_amount}
+              {` `}
+              {size === "default" && (
+                <span className="text-sm text-neutral-500 dark:text-neutral-400 font-normal">
+                  /night
+                </span>
+              )}
             </>
           </div>
-          {!!reviews && (
-            <StartRating reviewCount={reviews} />
-          )}
+          {!!reviews && <StartRating reviewCount={reviews} />}
         </div>
       </div>
     );
   };
- const href = "/"
+  const href = "/";
   return (
     <div
       className={`nc-StayCard group relative bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 rounded-2xl overflow-hidden will-change-transform hover:shadow-xl transition-shadow ${className}`}
